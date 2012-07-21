@@ -1,0 +1,12 @@
+# ignores in simple glob syntax
+syntax: glob
+*~
+*.class
+\#*\#
+build/*
+dist/*
+tmp/*
+
+
+# ignores as regular expressions
+syntax: regexp
