@@ -1,7 +1,7 @@
 package com.mchange.sc.v1.reconcile;
 
 /**
- * The idea of this is to define a kind of value object that may be specified
+ * The idea here is to define a kind of value object that may be specified
  * or acquired in a manner that is only partially complete. Information from multiple instances
  * of such Objects may be "reconciled" to yield a more complete description of the
  * business object being modeled.
@@ -9,7 +9,7 @@ package com.mchange.sc.v1.reconcile;
  * Data that may sometimes be unspecified should be modeled as Option[_] objects.
  *
  * Reconciliation can be symmetrical, such that clearly inconsistent data trigger
- * a CantRecognizeException, or may be asymmetrical, such that data in higher priority
+ * a CantReconcileException, or may be asymmetrical, such that data in higher priority
  * objects shadow conflicting data in lower priority objects. reconcile and
  * reconcileLeaf are symmetrical implementations, reconcileOver and reconcileOverLeaf
  * are asymmetrical implementations.
