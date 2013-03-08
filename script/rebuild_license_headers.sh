@@ -4,7 +4,7 @@ exec scala "$0" "$@"
 !#
 
 import java.io.File;
-import com.mchange.sc.v1.util.LicenceHeaderRewriter._;
+import com.mchange.sc.v1.util.LicenseHeaderRewriter._;
 
 val srcDir    = new File( args(0) );
 val targetDir = new File( args(1) );
@@ -38,9 +38,9 @@ val licenseHeader = """
 
 """;
 
-val headerConverter = identityHeaderConverter;
+val headerConverter = identityHeaderConverter _;
 
-val headerLineWhile = starSurroundHeaderLineWhile;
+val headerLineWhile = starSurroundHeaderLineWhile _;
 
 rewriteSrcDir( srcDir, targetDir : File, filter, licenseHeader, headerConverter, headerLineWhile );
 
