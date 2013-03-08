@@ -19,7 +19,8 @@
    
    <property name="mchange-commons-scala.version" value="0.3" />  
    <property name="mchange-commons-scala.name" value="mchange-commons-scala-${mchange-commons-scala.version}" />
-   <property name="src.dir" value="src" />
+   <!-- <property name="src.dir" value="src" /> -->
+   <property name="src.dir" value="src/main/scala" />
    <property name="scala.src.dir" value="${src.dir}/scala" />
    <property name="build.dir" value="build" />
    <property name="build.classes.dir" value="${build.dir}/classes" />
