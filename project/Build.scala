@@ -7,8 +7,9 @@ object MchangeCommonsScalaBuild extends Build {
   val nexusReleases = nexus + "service/local/staging/deploy/maven2";
 
   val mySettings = Seq( 
+    Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
-    Keys.version := "0.3.0-SNAPSHOT", 
+    Keys.version := "0.3.0", 
     Keys.scalaVersion := "2.9.2",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
