@@ -9,8 +9,8 @@ object MchangeCommonsScalaBuild extends Build {
   val mySettings = Seq( 
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
-    Keys.version := "0.3.0", 
-    Keys.scalaVersion := "2.9.2",
+    Keys.version := "0.4.0", 
+    Keys.scalaVersion := "2.10.0",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
 	if (v.trim.endsWith("SNAPSHOT"))
@@ -24,7 +24,7 @@ object MchangeCommonsScalaBuild extends Build {
   );
 
   val dependencies = Seq(
-    //"org.scala-lang" % "scala-actors" % "2.10.0+",
+    "org.scala-lang" % "scala-actors" % "2.10.0+",
     "com.mchange" % "mchange-commons-java" % "0.2.4-SNAPSHOT" changing()
   );
 

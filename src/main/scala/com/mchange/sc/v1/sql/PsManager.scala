@@ -157,7 +157,7 @@ object PsManager
  *  being substituted and the java.sql.Types typecode associated
  *  with the column.
  */ 
-class PsManager( val sql : String, info : RandomAccessSeq[Tuple2[String,Int]] )
+class PsManager( val sql : String, info : Vector[Tuple2[String,Int]] )
 {
   // we work with info directly only in the following 5 functions,
   // 'cuz jumping between 1-based and zero-based is bug-prone
@@ -194,7 +194,7 @@ class PsManager( val sql : String, info : RandomAccessSeq[Tuple2[String,Int]] )
 
   def wrap( ps : PreparedStatement ) = new WrappedPreparedStatement( this, ps );
 
-  def this( sql : String, paramInfos : List[Tuple2[String,Int]] ) = this( sql, RandomAccessSeq( paramInfos : _*) );
+  def this( sql : String, paramInfos : List[Tuple2[String,Int]] ) = this( sql, Vector( paramInfos : _*) );
 
   def this( sql : String, paramNames : List[String], paramTypeCodes : List[Int] ) = this( sql, PsManager.zipInfoLists( paramNames, paramTypeCodes ) );
 }

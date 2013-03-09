@@ -27,6 +27,7 @@ import scala.actors.Actor._;
 import scala.collection._;
 import scala.collection.mutable.ArrayBuffer;
 
+@deprecated(message = "Prefer parallel collections.")
 object CollectionProcessor {
   def apply[S,T]( fcn : (S) => T ) : CollectionProcessor[S,T] = new ForForOrderRetainingCollectionProcessor[S,T]( fcn );
 
@@ -55,6 +56,7 @@ object CollectionProcessor {
   private[actors] case object Exit;
 }
 
+@deprecated(message = "Prefer parallel collections.")
 abstract class CollectionProcessor[S,T]( fcn : (S) => T ) {
   def process( items : Iterable[S] ) : Iterable[T];
 
@@ -65,6 +67,7 @@ abstract class CollectionProcessor[S,T]( fcn : (S) => T ) {
   }
 }
 
+@deprecated(message = "Prefer parallel collections.")
 class SmoothMaxConcurrencyOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T, maxConcurrency : Int ) extends CollectionProcessor[S,T]( fcn ) {
   def process( items : Iterable[S] ) : Iterable[T] = {
     if (items.isEmpty)
@@ -96,7 +99,7 @@ class SmoothMaxConcurrencyOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T
     // confuse me.
     val out = mutable.HashMap.empty[Int,T];
 
-    val elements = inTuples.elements;
+    val elements = inTuples.iterator;
     
     for ( prefill <- 0 until maxConcurrency; if (elements.hasNext) ) actors(prefill) ! elements.next;
 
@@ -120,12 +123,13 @@ class SmoothMaxConcurrencyOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T
   }
 }
 
+@deprecated(message = "Prefer parallel collections.")
 class ChunkyMaxConcurrencyOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T, maxConcurrency : Int ) extends CollectionProcessor[S,T]( fcn ) {
   def process( items : Iterable[S] ) : Iterable[T] = {
     val out = new ArrayBuffer[T];
     val processor = CollectionProcessor[S,T]( fcn );    
 
-    val elements = items.elements;
+    val elements = items.iterator;
     while( elements.hasNext )
     {
       val inChunk = new ArrayBuffer[S];
@@ -138,6 +142,7 @@ class ChunkyMaxConcurrencyOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T
   }
 }
 
+@deprecated(message = "Prefer parallel collections.")
 class ForForOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T ) extends CollectionProcessor[S,T]( fcn ) {
 /* 
   Let's hope this is fixed by Scala 2.9...
@@ -248,6 +253,8 @@ class ForForOrderRetainingCollectionProcessor[S,T]( fcn : (S) => T ) extends Col
 //
 // plus, it fails to offer the processed objects back in
 // an order consistent with the corresponding precursor objects
+
+@deprecated(message = "Prefer parallel collections.")
 class MapMapCollectionProcessor[S,T]( fcn : (S) => T ) extends CollectionProcessor[S,T]( fcn ) {
   def process( items : Iterable[S] ) : Iterable[T] = {
     var cnt = 0;
