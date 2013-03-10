@@ -78,7 +78,7 @@ object LicenseHeaderRewriter {
 
   def starSurroundHeaderLineWhile( line : String ) : Boolean = {
     val trimmed = line.trim;
-    trimmed.startsWith("/*") || trimmed.startsWith("*") || trimmed.startsWith("*/");
+    (trimmed.startsWith("/*") && !trimmed.startsWith("/**")) || trimmed.startsWith("*") || trimmed.startsWith("*/");
   }
   
 }

@@ -1,6 +1,7 @@
 *~
 *.class
 \#*\#
+\.\#*
 build/*
 dist/*
 tmp/*
