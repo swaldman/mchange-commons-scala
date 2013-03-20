@@ -6,6 +6,10 @@ exec scala "$0" "$@"
 import java.io.File;
 import com.mchange.sc.v1.util.LicenseHeaderRewriter._;
 
+
+//Note: It's no problem if srcDir and targetDir are
+//      the same, although of course srcDir should be
+//      backed up before trying a destructive overwrite!
 val srcDir    = new File( args(0) );
 val targetDir = new File( args(1) );
 
