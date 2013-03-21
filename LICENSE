@@ -1,10 +1,4 @@
 /*
- * Distributed as part of mchange-commons-scala v0.4.0
- *
- * Copyright (C) 2013 Machinery For Change, Inc.
- *
- * Author: Steve Waldman <swaldman@mchange.com>
- *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of EITHER:
  *
@@ -30,19 +24,4 @@
  *
  * LGPL v2.1: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
  *  EPL v1.0: http://www.eclipse.org/org/documents/epl-v10.php 
- * 
  */
-
-package com.mchange.sc.v1.lang;
-
-object Union {
-  // i think that, as a practical matter, this is probably not so useful
-
-  // Miles Sabin's uboxed union type hack... see http://www.chuusai.com/2011/06/09/scala-union-types-curry-howard/
-  type ¬[A] = A => Nothing;
-  type ¬¬[A] = ¬[¬[A]];
-  type v[T, U] = ¬[¬[T] with ¬[U]];
-  type ~[T, U] = { type union[X] = ¬¬[X] <:< (T v U) };
-
-  // def check[T : (String~Int)#union ]( arg : T ) = arg
-}
