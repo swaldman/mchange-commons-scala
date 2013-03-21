@@ -20,6 +20,7 @@ object MchangeCommonsScalaBuild extends Build {
       }
     },
     Keys.resolvers += ("snapshots" at nexusSnapshots ),
+    Keys.scalacOptions += "-deprecation",
     Keys.pomExtra := pomExtraXml
   );
 
