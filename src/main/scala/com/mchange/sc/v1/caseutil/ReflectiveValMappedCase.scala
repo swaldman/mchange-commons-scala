@@ -1,4 +1,4 @@
-package com.mchange.sc.v1.lang;
+package com.mchange.sc.v1.caseutil;
 
 import com.mchange.sc.v1.reflect._;
 import com.mchange.sc.v1.util.concurrent._;
@@ -6,7 +6,7 @@ import scala.reflect.runtime.universe._;
 
 import java.util.concurrent.Callable;
 
-object ValMappedCase {
+object ReflectiveValMappedCase {
   val mirror = runtimeMirror( this.getClass.getClassLoader );
 }
 
@@ -15,8 +15,8 @@ object ValMappedCase {
  *
  * tType should be the type of that class.
  */ 
-trait CompanionOfValMappedCase[T] {
-  import ValMappedCase.mirror;
+trait CompanionOfReflectiveValMappedCase[T] extends CompanionOfValMappedCase[T] {
+  import ReflectiveValMappedCase.mirror;
 
   def tType : Type;
 
@@ -64,8 +64,8 @@ trait CompanionOfValMappedCase[T] {
   }
 }
 
-trait ValMappedCase {
-  import ValMappedCase.mirror;
+trait ReflectiveValMappedCase extends ValMappedCase {
+  import ReflectiveValMappedCase.mirror;
 
   def tType : scala.reflect.runtime.universe.Type;
 
@@ -86,10 +86,10 @@ trait ValMappedCase {
 	 val moduleSymbol : ModuleSymbol = classSymbol.companionSymbol.asModule;
 	 val moduleMirror : ModuleMirror = mirror.reflectModule(moduleSymbol);
 	 
-	 val tType = moduleMirror.instance.asInstanceOf[CompanionOfValMappedCase[_]].tType;
+	 val tType = moduleMirror.instance.asInstanceOf[CompanionOfReflectiveValMappedCase[_]].tType;
 	 */
       
-	val myReflection = mirror.reflect( ValMappedCase.this );
+	val myReflection = mirror.reflect( ReflectiveValMappedCase.this );
 	val valSymbols   = tType.members.filter( _.isTerm ).map( _.asTerm ).filter( _.isVal );
 	val valBindings  = valSymbols.map( sym => ( sym.name.decoded.trim, myReflection.reflectField( sym ).get ) );
 	Map( valBindings.toSeq : _* )

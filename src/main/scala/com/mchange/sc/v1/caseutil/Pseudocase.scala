@@ -1,4 +1,4 @@
-package com.mchange.v1.lang;
+package com.mchange.v1.caseutil;
 
 /**
  * Intended to be extended by Singleton objects.
