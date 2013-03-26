@@ -15,7 +15,7 @@ object ReflectiveValMappedCase {
  *
  * tType should be the type of that class.
  */ 
-trait CompanionOfReflectiveValMappedCase[T] extends CompanionOfValMappedCase[T] {
+trait CompanionOfReflectiveValMappedCase[T <: ReflectiveValMappedCase] extends CompanionOfValMappedCase[T] {
   import ReflectiveValMappedCase.mirror;
 
   def tType : Type;
@@ -26,8 +26,6 @@ trait CompanionOfReflectiveValMappedCase[T] extends CompanionOfValMappedCase[T] 
 
       def call() : Tuple2[ List[List[Symbol]], MethodMirror ] = {
 
-	println( "Making tuple..." );
-    
 	val _tType   : Type         = tType;
 	val ctorDecl : Symbol       = _tType.declaration(nme.CONSTRUCTOR);
 	val ctor     : MethodSymbol = ctorDecl.asMethod;
@@ -69,6 +67,8 @@ trait ReflectiveValMappedCase extends ValMappedCase {
 
   def tType : scala.reflect.runtime.universe.Type;
 
+  def extraBindings : Iterable[ ( String, Any ) ] = Map.empty[String,Any];
+
   lazy val toMap : Map[String,Any] = {
 
     val callable = new Callable[Map[String,Any]] {
@@ -97,18 +97,7 @@ trait ReflectiveValMappedCase extends ValMappedCase {
 
     }
 
-    /*
-     // was verbose for debugging
-
-    val valBindings  = valSymbols.map( sym => symbolToBinding( myReflection, sym ) );
-
-    private def symbolToBinding( myReflection : InstanceMirror, sym : TermSymbol ) = {
-    val name = sym.name.decoded.trim;
-    val value = myReflection.reflectField( sym ).get;
-    ( name, value )
-   */ 
-
-   ReflectionInvoker.invokeAndWait( callable  );
+   ReflectionInvoker.invokeAndWait( callable  ) ++ extraBindings;
   }
 }
 

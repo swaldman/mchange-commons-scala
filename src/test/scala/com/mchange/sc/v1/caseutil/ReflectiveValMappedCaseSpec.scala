@@ -18,8 +18,8 @@ class ReflectiveValMappedCaseSpec extends Specification {
   val testTestMap = Map[String,Any]( "str" -> "Hello", "map" -> Map("Goodbye" -> "Then"), "l" -> 1L);
 
   "A ReflectiveValMappedCase" should { 
-    "extract via toMap to an appropriate Map[String,Any]" in { 
-      testTest.toMap mustEqual testTestMap
+    "extract via toMap to an appropriate Map[String,Any] (which should contain all bindings but might contain extras)" in { 
+      testTest.toMap must havePairs(testTestMap.toSeq : _*) //the export map might contain extra fields
     }
   }
 
