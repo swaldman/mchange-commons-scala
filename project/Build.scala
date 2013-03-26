@@ -27,6 +27,7 @@ object MchangeCommonsScalaBuild extends Build {
   val dependencies = Seq(
     "org.scala-lang" % "scala-reflect" % "2.10.1",
     "org.scala-lang" % "scala-actors" % "2.10.1",
+    "org.specs2" %% "specs2" % "1.14+" % "test",
     "com.mchange" % "mchange-commons-java" % "0.2.4-SNAPSHOT" changing()
   );
 

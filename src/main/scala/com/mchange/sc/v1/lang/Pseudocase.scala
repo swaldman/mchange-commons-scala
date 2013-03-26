@@ -1,9 +1,15 @@
 package com.mchange.v1.lang;
 
+/**
+ * Intended to be extended by Singleton objects.
+ */ 
 trait Pseudocase[ENC,TUP] {
-  type > = ENC;
 
-  def apply( tuple : TUP ) : ENC;
-  def unapply( source : ENC ) : Option[TUP];
-  def conforms( obj : ENC ) : Boolean = (unapply( obj ) != None)
+  type Encoded = ENC;
+  type Tupled  = TUP;
+
+  def apply( tuple : Tupled ) : Encoded;
+  def unapply( source : Encoded ) : Option[Tupled];
+  def conforms( obj : Encoded ) : Boolean = (unapply( obj ) != None)
+
 }
