@@ -1,6 +1,7 @@
 package com.mchange.sc.v1.util.concurrent;
 
 import java.util.concurrent._;
+import com.mchange.sc.v1.util.NullFunction;
 
 class RestrictToThreadInvoker( threadName : String ) extends Invoker {
 
@@ -28,7 +29,7 @@ class RestrictToThreadInvoker( threadName : String ) extends Invoker {
       }
     }
     val exe = Executors.newSingleThreadExecutor( tf );
-    exe.submit( new Runnable(){ def run : Unit = {} } ); //prime, start the Thread immediately on construction, bind to a lazy var if you want lazy
+    exe.submit( NullFunction ); //prime, start the Thread immediately on construction, bind to a lazy var if you want lazy
     exe
   }
 

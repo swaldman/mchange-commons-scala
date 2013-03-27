@@ -82,11 +82,11 @@ trait ReflectiveValMappedCase extends ValMappedCase {
 	 // see https://gist.github.com/xeno-by/4985929
 	 // http://stackoverflow.com/questions/11084408/scala-reflection-error-this-is-an-inner-module-use-reflectmodule-on-an-instanc
 	 
-	 val classSymbol  : ClassSymbol  = mirror.classSymbol( this.getClass );
-	 val moduleSymbol : ModuleSymbol = classSymbol.companionSymbol.asModule;
-	 val moduleMirror : ModuleMirror = mirror.reflectModule(moduleSymbol);
-	 
-	 val tType = moduleMirror.instance.asInstanceOf[CompanionOfReflectiveValMappedCase[_]].tType;
+	val classSymbol  : ClassSymbol  = mirror.classSymbol( this.getClass );
+	val moduleSymbol : ModuleSymbol = classSymbol.companionSymbol.asModule;
+	val moduleMirror : ModuleMirror = mirror.reflectModule(moduleSymbol);
+	
+	val tType = moduleMirror.instance.asInstanceOf[CompanionOfReflectiveValMappedCase[_]].tType;
 	 */
       
 	val myReflection = mirror.reflect( ReflectiveValMappedCase.this );
