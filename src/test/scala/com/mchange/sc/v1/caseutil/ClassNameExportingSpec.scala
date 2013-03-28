@@ -1,16 +1,17 @@
 package com.mchange.sc.v1.caseutil;
 
 import scala.reflect.runtime.universe._;
-import org.specs2.mutable._;
-
 import com.mchange.sc.v1.reflect._;
 
+import org.specs2.mutable._;
+
 // Note that for now, ValMappedCase only works with top-level classes
-object CNETest extends CompanionOfReflectiveValMappedCase[CNETest] {
-  def tType : Type = typeOf[CNETest];
+object CNETest extends CompanionOfReflectiveValMappedCase[CNETest]{
+  def typeTag = compileTimeTypeTag[CNETest];
 }
+
 case class CNETest(val str : String, val map : Map[String,String], val l : Long) extends ReflectiveValMappedCase with ClassNameExporting{
-  def tType : Type = CNETest.tType;
+  def tType : Type = CNETest.typeTag.tpe;
 }
 
 class ClassNameExportingSpec extends Specification { 

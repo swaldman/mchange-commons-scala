@@ -1,22 +1,24 @@
 package com.mchange.sc.v1.caseutil;
 
 import scala.reflect.runtime.universe._;
-import org.specs2.mutable._;
-
 import com.mchange.sc.v1.reflect._;
 
-import com.mchange.v3.decode._;
+import org.specs2.mutable._;
+
+import com.mchange.sc.v1.decode._;
 
 // Note that for now, ValMappedCase only works with top-level classes
-object DecodableTest extends CompanionOfReflectiveValMappedCase[DecodableTest] {
-  def tType : Type = typeOf[DecodableTest];
+object DecodableTest extends CompanionOfDecodable[DecodableTest]{
+  def typeTag = compileTimeTypeTag[DecodableTest];
 }
-case class DecodableTest(val str : String, val map : Map[String,String], val l : Long) extends ReflectiveValMappedCase with Decodable {
-  def tType : Type = DecodableTest.tType;
+
+case class DecodableTest(val str : String, val map : Map[String,String], val l : Long) extends Decodable {
+  def tType : Type = DecodableTest.typeTag.tpe;
 }
 
 class DecodableSpec extends Specification { 
   val testTest = DecodableTest("Hello", Map("Goodbye" -> "Then"), 1L);
+  println( testTest.toMap );
   val testTestMap = Map[String,Any]( "str" -> "Hello", "map" -> Map("Goodbye" -> "Then"), "l" -> 1L);
   val testTestAugmentedMap = 
     Map[String,Any]( 
@@ -34,9 +36,20 @@ class DecodableSpec extends Specification {
   }
 
   "An exported Map" should {
-    "parse into a correct the correct class and value via the ClassNameExporting companion object" in {
-      val decoder = Class.forName(testTestAugmentedMap(".decoderClass").asInstanceOf[String]).newInstance.asInstanceOf[Decoder]; 
-      decoder.decode( testTestAugmentedMap ) mustEqual testTest
+    "parse into a correct the correct class and value via the decode function" in {
+      //val decoder = Class.forName(testTestAugmentedMap(".decoderClass").asInstanceOf[String]).newInstance.asInstanceOf[Decoder]; 
+      //decoder.decode( testTestAugmentedMap ) mustEqual testTest
+      decode( testTestAugmentedMap ) mustEqual testTest
+    }
+  }
+
+
+  "A Decodable's companion object" should {
+    "be able to 'coerce' an appropriate Map into a Decodable" in {
+      DecodableTest.coerce( testTestAugmentedMap ) mustEqual Some( testTest )
+    }
+    "be fail to 'coerce' an inappropriate object into a Decodable" in {
+      DecodableTest.coerce( DecodableTest ) mustEqual None
     }
   }
 }

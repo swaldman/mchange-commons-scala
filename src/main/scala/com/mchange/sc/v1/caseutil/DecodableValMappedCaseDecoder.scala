@@ -8,7 +8,7 @@ class DecodableValMappedCaseDecoder extends Decoder {
   def decode( obj : Object ) : Object = {
     try {
       obj match {
-	case map : Map[String,Any] => { //unchecked, but a ClassCastException would be caught below.
+	case map : Map[String,Any] => { //unchecked. hmmm...
 	  val maybe = ClassNameExporting.fromMap( map );
 	  maybe match {
 	    case Some( vmc : ValMappedCase ) => vmc;

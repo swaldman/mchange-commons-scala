@@ -18,7 +18,7 @@ object ReflectiveValMappedCase {
 trait CompanionOfReflectiveValMappedCase[T <: ReflectiveValMappedCase] extends CompanionOfValMappedCase[T] {
   import ReflectiveValMappedCase.mirror;
 
-  def tType : Type;
+  def typeTag : TypeTag[T];
 
   private lazy val tuple = {
 
@@ -26,7 +26,7 @@ trait CompanionOfReflectiveValMappedCase[T <: ReflectiveValMappedCase] extends C
 
       def call() : Tuple2[ List[List[Symbol]], MethodMirror ] = {
 
-	val _tType   : Type         = tType;
+	val _tType   : Type         = typeTag.tpe;
 	val ctorDecl : Symbol       = _tType.declaration(nme.CONSTRUCTOR);
 	val ctor     : MethodSymbol = ctorDecl.asMethod;
 	

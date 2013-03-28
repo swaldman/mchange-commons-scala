@@ -1,16 +1,17 @@
 package com.mchange.sc.v1.caseutil;
 
 import scala.reflect.runtime.universe._;
-import org.specs2.mutable._;
-
 import com.mchange.sc.v1.reflect._;
 
+import org.specs2.mutable._;
+
 // Note that for now, ValMappedCase only works with top-level classes
-object Test extends CompanionOfReflectiveValMappedCase[Test] {
-  def tType : Type = typeOf[Test];
+object Test extends CompanionOfReflectiveValMappedCase[Test]{
+  def typeTag = compileTimeTypeTag[Test];
 }
+
 case class Test(val str : String, val map : Map[String,String], val l : Long) extends ReflectiveValMappedCase{
-  def tType : Type = Test.tType;
+  def tType : Type = Test.typeTag.tpe;
 }
 
 class ReflectiveValMappedCaseSpec extends Specification { 

@@ -12,7 +12,7 @@ package object reflect {
   // http://stackoverflow.com/questions/11628379/how-to-know-if-an-object-is-an-instance-of-a-typetags-type
   def instanceToCompileTimeType[T : TypeTag]( instance : T ) = typeOf[T]
 
-  def instanceToCompileTimeTypeTag[T : TypeTag] = implicitly[TypeTag[T]];
+  def compileTimeTypeTag[T : TypeTag] = implicitly[TypeTag[T]];
 
 
   /**

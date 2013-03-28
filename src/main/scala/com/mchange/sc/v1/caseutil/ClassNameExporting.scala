@@ -23,6 +23,6 @@ object ClassNameExporting {
   }
 }
 
-trait ClassNameExporting { self : ReflectiveValMappedCase =>
+trait ClassNameExporting extends ReflectiveValMappedCase {
   override def extraBindings : Iterable[ ( String, Any ) ] = Map( ClassNameExporting.ClassNameKey -> this.getClass.getName );
 }

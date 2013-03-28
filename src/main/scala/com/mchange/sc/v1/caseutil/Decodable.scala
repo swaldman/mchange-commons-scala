@@ -1,10 +1,10 @@
 package com.mchange.sc.v1.caseutil;
 
-object Decodable {
-  val DecoderClassKey = ".decoderClass";
-}
+import com.mchange.sc.v1.decode._;
 
-trait Decodable extends ClassNameExporting { self : ReflectiveValMappedCase =>
-  override def extraBindings : Iterable[ ( String, Any ) ] = super.extraBindings ++ Map( Decodable.DecoderClassKey -> classOf[DecodableValMappedCaseDecoder].getName );
+trait CompanionOfDecodable[T <: Decodable] extends CompanionOfReflectiveValMappedCase[T] with DecodeCoercer[T];
+
+trait Decodable extends ClassNameExporting { 
+  override def extraBindings : Iterable[ ( String, Any ) ] = super.extraBindings ++ Map( DecoderClassKey -> classOf[DecodableValMappedCaseDecoder].getName );
 }
 
