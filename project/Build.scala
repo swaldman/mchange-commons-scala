@@ -27,8 +27,9 @@ object MchangeCommonsScalaBuild extends Build {
   val dependencies = Seq(
     "org.scala-lang" % "scala-reflect" % "2.10.1",
     "org.scala-lang" % "scala-actors" % "2.10.1",
-    "org.specs2" %% "specs2" % "1.14+" % "test",
-    "com.mchange" % "mchange-commons-java" % "0.2.5-SNAPSHOT" changing()
+    "org.specs2"  %% "specs2" % "1.14+" % "test",
+    "com.mchange" %% "mchange-commons-java"  % "0.2.5-SNAPSHOT" changing(),
+    "com.mchange" %% "mchange-commons-scala" % "0.0.1-SNAPSHOT" changing()
   );
 
   override lazy val settings = super.settings ++ mySettings;
@@ -40,12 +41,17 @@ object MchangeCommonsScalaBuild extends Build {
   ); 
 
   val pomExtraXml = (
-      <url>http://www.mchange.com/mchange-commons-scala</url>
+      <url>https://github.com/swaldman/mchange-commons-scala</url>
       <licenses>
         <license>
           <name>GNU Lesser General Public License, Version 2.1</name>
           <url>http://www.gnu.org/licenses/lgpl-2.1.html</url> 
-          <distribution>repo</distribution>                                                                                                                       
+          <distribution>repo</distribution>
+        </license>
+        <license>
+          <name>Eclipse Public License, Version 1.0</name>
+          <url>http://www.eclipse.org/org/documents/epl-v10.html</url> 
+          <distribution>repo</distribution>
         </license>
      </licenses>
      <scm>
