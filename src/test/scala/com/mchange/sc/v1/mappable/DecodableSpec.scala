@@ -1,4 +1,4 @@
-package com.mchange.sc.v1.caseutil;
+package com.mchange.sc.v1.mappable;
 
 import scala.reflect.runtime.universe._;
 import com.mchange.sc.v1.reflect._;
@@ -7,7 +7,7 @@ import org.specs2.mutable._;
 
 import com.mchange.sc.v1.decode._;
 
-// Note that for now, ValMappedCase only works with top-level classes
+// Note that for now, Mappable only works with top-level classes
 object DecodableTest extends CompanionOfDecodable[DecodableTest]{
   def typeTag = compileTimeTypeTag[DecodableTest];
 }
@@ -26,7 +26,7 @@ class DecodableSpec extends Specification {
       "map" -> Map("Goodbye" -> "Then"), 
       "l" -> 1L, 
       ".className" -> classOf[DecodableTest].getName,
-      ".decoderClass" -> classOf[DecodableValMappedCaseDecoder].getName
+      ".decoderClass" -> classOf[DecodableMappableDecoder].getName
     );
 
   "A Decodable" should { 

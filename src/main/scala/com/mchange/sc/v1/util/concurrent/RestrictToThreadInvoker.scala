@@ -47,4 +47,8 @@ class RestrictToThreadInvoker( threadName : String ) extends Invoker {
     latch.await;
     if ( Thread.currentThread == myThread ) runnable.run else executorService.submit( runnable );
   }
+
+  def shutdown : Unit = executorService.shutdown();
+
+  def close : Unit = shutdown;
 }

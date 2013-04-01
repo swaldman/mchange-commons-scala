@@ -1,16 +1,16 @@
-package com.mchange.sc.v1.caseutil;
+package com.mchange.sc.v1.mappable;
 
 import scala.reflect.runtime.universe._;
 import com.mchange.sc.v1.reflect._;
 
 import org.specs2.mutable._;
 
-// Note that for now, ValMappedCase only works with top-level classes
-object CNETest extends CompanionOfReflectiveValMappedCase[CNETest]{
+// Note that for now, Mappable only works with top-level classes
+object CNETest extends CompanionOfReflectiveMappable[CNETest]{
   def typeTag = compileTimeTypeTag[CNETest];
 }
 
-case class CNETest(val str : String, val map : Map[String,String], val l : Long) extends ReflectiveValMappedCase with ClassNameExporting{
+case class CNETest(val str : String, val map : Map[String,String], val l : Long) extends ReflectiveMappable with ClassNameExporting{
   def tType : Type = CNETest.typeTag.tpe;
 }
 
@@ -27,7 +27,7 @@ class ClassNameExportingSpec extends Specification {
 
   "An exported Map" should {
     "parse into a correct the correct class and value via the ClassNameExporting companion object" in {
-      ClassNameExporting.fromMap( testTestAugmentedMap ).get mustEqual testTest
+      ClassNameExporting.maybeFromMap( testTestAugmentedMap ).get mustEqual testTest
     }
   }
 }

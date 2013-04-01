@@ -1,17 +1,17 @@
-package com.mchange.sc.v1.caseutil;
+package com.mchange.sc.v1.mappable;
 
 import com.mchange.v3.decode._;
 
-class DecodableValMappedCaseDecoder extends Decoder {
+class DecodableMappableDecoder extends Decoder {
 
   @throws[CannotDecodeException]
   def decode( obj : Object ) : Object = {
     try {
       obj match {
 	case map : Map[String,Any] => { //unchecked. hmmm...
-	  val maybe = ClassNameExporting.fromMap( map );
+	  val maybe = ClassNameExporting.maybeFromMap( map );
 	  maybe match {
-	    case Some( vmc : ValMappedCase ) => vmc;
+	    case Some( vmc : Mappable ) => vmc;
 	    case Some( unk ) => throw new CannotDecodeException( "Object of unexpected type: %s".format( unk ) );
 	    case None => throw new CannotDecodeException( "Could not decode source map: %s".format( map ) );
 	  }

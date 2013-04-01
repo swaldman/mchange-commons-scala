@@ -28,8 +28,8 @@ object MchangeCommonsScalaBuild extends Build {
     "org.scala-lang" % "scala-reflect" % "2.10.1",
     "org.scala-lang" % "scala-actors" % "2.10.1",
     "org.specs2"  %% "specs2" % "1.14+" % "test",
-    "com.mchange" %% "mchange-commons-java"  % "0.2.5-SNAPSHOT" changing(),
-    "com.mchange" %% "mchange-commons-scala" % "0.0.1-SNAPSHOT" changing()
+    "com.mchange" % "mchange-commons-java" % "0.2.5-SNAPSHOT" changing(),
+    "com.mchange" %% "mchange-commons-scala-macro" % "0.0.1-SNAPSHOT" changing()
   );
 
   override lazy val settings = super.settings ++ mySettings;
