@@ -49,14 +49,12 @@ trait CompanionOfReflectiveMappable[T <: ReflectiveMappable] extends CompanionOf
   }
 }
 
-trait ReflectiveMappable extends Mappable {
+trait ReflectiveMappable extends AnnotatedMappable {
   import ReflectiveMappable.mirror;
 
   def tType : scala.reflect.runtime.universe.Type;
 
-  def extraBindings : Iterable[ ( String, Any ) ] = Map.empty[String,Any];
-
-  lazy val toMap : Map[String,Any] = ReflectionInvoker.await {
+  lazy val _toMap : Map[String,Any] = ReflectionInvoker.await {
 
     /*
      // fragile, breaks when Scala thinks companion is an inner type, which
@@ -76,8 +74,7 @@ trait ReflectiveMappable extends Mappable {
     val myReflection = mirror.reflect( ReflectiveMappable.this );
     val valSymbols   = tType.members.filter( _.isTerm ).map( _.asTerm ).filter( _.isVal );
     val valBindings  = valSymbols.map( sym => ( sym.name.decoded.trim, myReflection.reflectField( sym ).get ) );
-    Map( valBindings.toSeq : _* ) ++ extraBindings;
-
+    Map( valBindings.toSeq : _* )
   }
 }
 

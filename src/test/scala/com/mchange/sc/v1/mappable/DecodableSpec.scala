@@ -9,11 +9,12 @@ import com.mchange.sc.v1.decode._;
 
 // Note that for now, Mappable only works with top-level classes
 object DecodableTest extends CompanionOfDecodable[DecodableTest]{
-  def typeTag = compileTimeTypeTag[DecodableTest];
+  def fromMap( map : Map[String,Any] ) : DecodableTest = scalamacro.constructFromMap[DecodableTest]( map ); 
 }
 
 case class DecodableTest(val str : String, val map : Map[String,String], val l : Long) extends Decodable {
-  def tType : Type = DecodableTest.typeTag.tpe;
+  def _toMap : Map[String,Any] = scalamacro.extractMap( this );
+  val staticFactoryClassName : String = "com.mchange.sc.v1.mappable.DecodableTest"
 }
 
 class DecodableSpec extends Specification { 
@@ -25,12 +26,12 @@ class DecodableSpec extends Specification {
       "str" -> "Hello", 
       "map" -> Map("Goodbye" -> "Then"), 
       "l" -> 1L, 
-      ".className" -> classOf[DecodableTest].getName,
+      ".staticFactoryClassName" -> "com.mchange.sc.v1.mappable.DecodableTest",
       ".decoderClass" -> classOf[DecodableMappableDecoder].getName
     );
 
   "A Decodable" should { 
-    "extract via toMap to an appropriate Map[String,Any] (which should contain all bindings plus a '.className' and '.decoderClass' extra)" in { 
+    "extract via toMap to an appropriate Map[String,Any] (which should contain all bindings plus a '.staticFactoryClassName' and '.decoderClass' extra)" in { 
       testTest.toMap must havePairs(testTestAugmentedMap.toSeq : _*) //the export map might contain extra fields
     }
   }
