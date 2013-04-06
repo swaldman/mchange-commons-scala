@@ -37,7 +37,7 @@ object ClassNameExporting {
 trait CompanionOfClassNameExporting[T <: Mappable] extends CompanionOfMappable[T];
 
 trait ClassNameExporting extends AnnotatedMappable {
-  val staticFactoryClassName : String;
+  def staticFactoryClassName : String = this.getClass.getName;
 
   override def extraBindings : Iterable[ ( String, Any ) ] = Map( ClassNameExporting.StaticFactoryClassNameKey -> staticFactoryClassName );
 }

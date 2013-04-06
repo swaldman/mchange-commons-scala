@@ -14,7 +14,6 @@ object DecodableTest extends CompanionOfDecodable[DecodableTest]{
 
 case class DecodableTest(val str : String, val map : Map[String,String], val l : Long) extends Decodable {
   def _toMap : Map[String,Any] = scalamacro.extractMap( this );
-  val staticFactoryClassName : String = "com.mchange.sc.v1.mappable.DecodableTest"
 }
 
 class DecodableSpec extends Specification { 

@@ -12,7 +12,6 @@ object CNETest extends CompanionOfClassNameExporting[CNETest]{
 
 case class CNETest(val str : String, val map : Map[String,String], val l : Long) extends ClassNameExporting{
   def _toMap : Map[String,Any] = scalamacro.extractMap( this );
-  val staticFactoryClassName : String = "com.mchange.sc.v1.mappable.CNETest"
 }
 
 class ClassNameExportingSpec extends Specification { 
