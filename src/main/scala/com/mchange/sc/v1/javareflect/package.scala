@@ -35,6 +35,8 @@
 
 package com.mchange.sc.v1;
 
+import language.implicitConversions;
+
 import com.mchange.v2.log._;
 
 package object javareflect {

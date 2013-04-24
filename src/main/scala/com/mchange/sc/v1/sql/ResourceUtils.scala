@@ -35,6 +35,8 @@
 
 package com.mchange.sc.v1.sql;
 
+import language.reflectiveCalls;
+
 import java.sql.{Connection,DriverManager,PreparedStatement,Statement,ResultSet};
 import javax.sql.DataSource;
 import com.mchange.sc.v1.util.ClosableUtils._;

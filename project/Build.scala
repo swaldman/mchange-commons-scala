@@ -20,15 +20,17 @@ object MchangeCommonsScalaBuild extends Build {
       }
     },
     Keys.resolvers += ("snapshots" at nexusSnapshots ),
-    Keys.scalacOptions += "-deprecation",
+    Keys.scalacOptions ++= Seq("-deprecation", "-feature"),
     Keys.pomExtra := pomExtraXml
   );
 
   val dependencies = Seq(
     "org.scala-lang" % "scala-reflect" % "2.10.1",
     "org.scala-lang" % "scala-actors" % "2.10.1",
+    "com.typesafe.akka" %% "akka-actor" % "2.1+",
+    "com.typesafe" % "config" % "1.0.0" % "compile,optional",
     "org.specs2"  %% "specs2" % "1.14+" % "test",
-    "com.mchange" % "mchange-commons-java" % "0.2.5-SNAPSHOT" changing(),
+    "com.mchange" % "mchange-commons-java" % "0.2.6-SNAPSHOT" changing(),
     "com.mchange" %% "mchange-commons-scala-macro" % "0.0.1-SNAPSHOT" changing()
   );
 
@@ -61,7 +63,7 @@ object MchangeCommonsScalaBuild extends Build {
      <developers>
        <developer>
          <id>swaldman</id>
-         <name>Steve Waldmam</name>
+         <name>Steve Waldman</name>
          <email>swaldman@mchange.com</email>
        </developer>
      </developers>

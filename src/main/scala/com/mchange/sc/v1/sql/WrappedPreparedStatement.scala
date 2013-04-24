@@ -35,6 +35,8 @@
 
 package com.mchange.sc.v1.sql;
 
+import language.implicitConversions;
+
 import java.sql.{PreparedStatement,ResultSet};
 
 object WrappedPreparedStatement

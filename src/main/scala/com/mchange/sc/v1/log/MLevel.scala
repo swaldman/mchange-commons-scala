@@ -35,7 +35,12 @@
 
 package com.mchange.sc.v1.log;
 
+import language.implicitConversions;
+
 object MLevel {
+
+  implicit def toJavaLevel( scalaLevel : MLevel ) : com.mchange.v2.log.MLevel = scalaLevel._level;
+
   private[log] def forInner( inner : com.mchange.v2.log.MLevel ) : MLevel = inner match {
     case com.mchange.v2.log.MLevel.ALL => ALL
     case com.mchange.v2.log.MLevel.CONFIG => CONFIG

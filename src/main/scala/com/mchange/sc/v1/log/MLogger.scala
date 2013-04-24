@@ -35,15 +35,22 @@
 
 package com.mchange.sc.v1.log;
 
+import language.implicitConversions;
+
 import java.util.ResourceBundle;
 
 object MLogger {
+  
+  implicit def toJavaLogger( scalaLogger : MLogger ) : com.mchange.v2.log.MLogger = scalaLogger.inner;
+
   def apply( name : String ) : MLogger = {
     val unwrapped = com.mchange.v2.log.MLog.getLogger( name );
     new MLogger( unwrapped );
   }
 
-  def apply( obj : Any ) : MLogger = apply ( obj.getClass.getName );
+  def apply( clz : Class[_] ) : MLogger = apply( clz.getName );
+
+  def apply( obj : Any ) : MLogger = apply ( obj.getClass );
 }
 
 class MLogger( private[log] val inner : com.mchange.v2.log.MLogger ){
@@ -52,19 +59,29 @@ class MLogger( private[log] val inner : com.mchange.v2.log.MLogger ){
 
   implicit val logger : MLogger = this;
 
+  @deprecated( message="stick to common denominator logging through MLog facade" )
   def resourceBundle : ResourceBundle = inner.getResourceBundle();
+
+  @deprecated( message="stick to common denominator logging through MLog facade" )
   def resourceBundleName : String = inner.getResourceBundleName();
-   def level_=( level : MLevel) : Unit = inner.setLevel( level._level );
+
+  @deprecated( message="stick to common denominator logging through MLog facade" )
+  def level_=( level : MLevel) : Unit = inner.setLevel( level._level );
+
+  @deprecated( message="stick to common denominator logging through MLog facade" )
   def level : MLevel = MLevel.forInner( inner.getLevel() );
   
   def log( level : MLevel, message : =>String ) : Unit = level.doIf( inner.log( _, message ) );
   def log( level : MLevel, message : =>String, error : =>Throwable ) : Unit = level.doIf( inner.log( _, message, error ) );
+  //def logFormat( level : MLevel, message : =>String, paramArray : =>Array[Any] ) = level.doIf( inner.log( _, message, paramArray ) );
   def logFormat( level : MLevel, message : =>String, params : =>Seq[Any] ) = level.doIf( inner.log( _, message, params.toArray ) );
   def logp( level : MLevel, sourceClass : =>String, sourceMethod : =>String,  message : =>String) = level.doIf( inner.logp( _, sourceClass, sourceMethod, message) );
   def logp( level : MLevel, sourceClass : =>String, sourceMethod : =>String,  message : =>String, error : =>Throwable) = level.doIf( inner.logp( _, sourceClass, sourceMethod, message, error) );
+  //def logpFormat( level : MLevel, sourceClass : =>String, sourceMethod : =>String,  message : =>String, paramArray : =>Array[Any] ) = level.doIf( inner.logp( _, sourceClass, sourceMethod, message, paramArray) );
   def logpFormat( level : MLevel, sourceClass : =>String, sourceMethod : =>String,  message : =>String, params : =>Seq[Any] ) = level.doIf( inner.logp( _, sourceClass, sourceMethod, message, params.toArray) );
   def logrb( level : MLevel, sourceClass : =>String, sourceMethod : =>String, resourceBundle : =>String, message : =>String) = level.doIf( inner.logrb( _, sourceClass, sourceMethod, resourceBundle, message) );
   def logrb( level : MLevel, sourceClass : =>String, sourceMethod : =>String, resourceBundle : =>String, message : =>String, error : =>Throwable) = level.doIf( inner.logrb( _, sourceClass, sourceMethod, resourceBundle, message, error) );
+  //def logrbFormat( level : MLevel, sourceClass : =>String, sourceMethod : =>String, resourceBundle : =>String, message : =>String, paramArray : =>Array[Any] ) = level.doIf( inner.logrb( _, sourceClass, sourceMethod, resourceBundle, message, paramArray) );
   def logrbFormat( level : MLevel, sourceClass : =>String, sourceMethod : =>String, resourceBundle : =>String, message : =>String, params : =>Seq[Any] ) = level.doIf( inner.logrb( _, sourceClass, sourceMethod, resourceBundle, message, params.toArray) );
   
   def entering(sourceClass : =>String, sourceMethod : =>String) = FINER.doIf( l => inner.entering( sourceClass, sourceMethod ) );
