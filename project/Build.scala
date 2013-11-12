@@ -30,6 +30,7 @@ object MchangeCommonsScalaBuild extends Build {
     "com.typesafe.akka" %% "akka-actor" % "2.1+",
     "com.typesafe" % "config" % "1.0.0" % "compile,optional",
     "org.specs2"  %% "specs2" % "1.14+" % "test",
+    "com.mchange" %% "mlog-scala" % "0.3.0+",
     "com.mchange" % "mchange-commons-java" % "0.2.6.3-SNAPSHOT" changing(),
     "com.mchange" %% "mchange-commons-scala-macro" % "0.0.1-SNAPSHOT" changing()
   );
