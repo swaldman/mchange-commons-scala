@@ -10,7 +10,8 @@ object MchangeCommonsScalaBuild extends Build {
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
     Keys.version := "0.4.0-SNAPSHOT", 
-    Keys.scalaVersion := "2.10.1",
+    Keys.crossScalaVersions := Seq("2.10.2", "2.11.2"),
+    //Keys.scalaVersion := "2.10.1",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
 	if (v.trim.endsWith("SNAPSHOT"))
@@ -30,8 +31,8 @@ object MchangeCommonsScalaBuild extends Build {
     "com.typesafe.akka" %% "akka-actor" % "2.1+",
     "com.typesafe" % "config" % "1.0.0" % "compile,optional",
     "org.specs2"  %% "specs2" % "1.14+" % "test",
-    "com.mchange" %% "mlog-scala" % "0.3.0+",
-    "com.mchange" % "mchange-commons-java" % "0.2.6.3-SNAPSHOT" changing(),
+    "com.mchange" %% "mlog-scala" % "0.3.4",
+    "com.mchange" % "mchange-commons-java" % "0.2.6+" changing(),
     "com.mchange" %% "mchange-commons-scala-macro" % "0.0.1-SNAPSHOT" changing()
   );
 
