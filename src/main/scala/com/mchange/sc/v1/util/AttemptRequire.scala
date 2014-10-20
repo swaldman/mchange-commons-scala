@@ -57,7 +57,7 @@ object AttemptRequire {
       case e : Exception => {
 	if ( swallow ) {
 	  if (logger.isLoggable( logLevel ) )
-	    logger.log(logLevel, opName + " failed, but failure was ignored." + (if (dflt != ()) " Returning default value."), e);
+	    logger.log(logLevel, opName + " failed, but failure was ignored." + (if (dflt != (())) " Returning default value."), e);
 	  dflt;
 	} else {
 	  throw e;
@@ -66,7 +66,7 @@ object AttemptRequire {
     }
   }
 
-  def attempt( swallow : Boolean, logLevel : MLevel, opName : String)(op : => Unit)(implicit logger : MLogger) : Unit = attempt( swallow, logLevel, opName, ())(op)(logger);
+  def attempt( swallow : Boolean, logLevel : MLevel, opName : String)(op : => Unit)(implicit logger : MLogger) : Unit = attempt( swallow, logLevel, opName, (()))(op)(logger);
 
   def attempt[T]( logLevel : MLevel, opName : String, dflt : T)(op : => T )(implicit logger : MLogger) : T = attempt( true, logLevel, opName, dflt )( op )( logger );
 

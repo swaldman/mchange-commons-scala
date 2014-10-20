@@ -10,8 +10,8 @@ object MchangeCommonsScalaBuild extends Build {
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
     Keys.version := "0.4.0-SNAPSHOT", 
-    Keys.crossScalaVersions := Seq("2.10.2", "2.11.2"),
-    //Keys.scalaVersion := "2.10.1",
+    Keys.crossScalaVersions := Seq("2.10.4", "2.11.2"),
+    Keys.scalaVersion := "2.11.2",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
 	if (v.trim.endsWith("SNAPSHOT"))
@@ -21,19 +21,43 @@ object MchangeCommonsScalaBuild extends Build {
       }
     },
     Keys.resolvers += ("snapshots" at nexusSnapshots ),
+    Keys.resolvers += ("Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"),
     Keys.scalacOptions ++= Seq("-deprecation", "-feature"),
-    Keys.pomExtra := pomExtraXml
+    Keys.pomExtra := pomExtraXml,
+
+    // UGH!
+    //
+    // add scala-xml dependency when needed (for Scala 2.11 and newer) in a robust way
+    // this mechanism supports cross-version publishing
+    // taken from: http://github.com/scala/scala-module-dependency-sample
+    Keys.libraryDependencies := {
+      CrossVersion.partialVersion(Keys.scalaVersion.value) match {
+        // if scala 2.11+ is used, add dependency on scala-xml module
+        case Some((2, scalaMajor)) if scalaMajor >= 11 => {
+          Keys.libraryDependencies.value ++ Seq(
+            //"org.scala-lang.modules" %% "scala-xml" % "1.0.1",
+            //"org.scala-lang.modules" %% "scala-swing" % "1.0.1",
+            "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2",
+            "org.scala-lang" % "scala-reflect" % "2.11.2"
+          )
+        }
+        case _ => {
+          // or just libraryDependencies.value if you don't depend on scala-swing
+          //libraryDependencies.value :+ "org.scala-lang" % "scala-swing" % scalaVersion.value
+          Keys.libraryDependencies.value ++ Seq(
+            "org.scala-lang" % "scala-reflect" % "2.10.4"
+          )
+        }
+      }
+    }
   );
 
   val dependencies = Seq(
-    "org.scala-lang" % "scala-reflect" % "2.10.1",
-    "org.scala-lang" % "scala-actors" % "2.10.1",
-    "com.typesafe.akka" %% "akka-actor" % "2.1+",
+    "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe" % "config" % "1.0.0" % "compile,optional",
-    "org.specs2"  %% "specs2" % "1.14+" % "test",
+    "org.specs2"  %% "specs2" % "2.4.6" % "test",
     "com.mchange" %% "mlog-scala" % "0.3.4",
-    "com.mchange" % "mchange-commons-java" % "0.2.6+" changing(),
-    "com.mchange" %% "mchange-commons-scala-macro" % "0.0.1-SNAPSHOT" changing()
+    "com.mchange" % "mchange-commons-java" % "0.2.8"
   );
 
   override lazy val settings = super.settings ++ mySettings;
