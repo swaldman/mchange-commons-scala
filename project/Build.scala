@@ -56,8 +56,8 @@ object MchangeCommonsScalaBuild extends Build {
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe" % "config" % "1.0.0" % "compile,optional",
     "org.specs2"  %% "specs2" % "2.4.6" % "test",
-    "com.mchange" %% "mlog-scala" % "0.3.4",
-    "com.mchange" % "mchange-commons-java" % "0.2.8"
+    "com.mchange" %% "mlog-scala" % "0.3.6",
+    "com.mchange" % "mchange-commons-java" % "0.2.10-SNAPSHOT" changing()
   );
 
   override lazy val settings = super.settings ++ mySettings;
