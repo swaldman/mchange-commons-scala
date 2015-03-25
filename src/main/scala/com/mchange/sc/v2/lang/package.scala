@@ -13,21 +13,22 @@ package object lang {
       case e : Exception => {
         if ( t != null )
           t.addSuppressed( e );
-        FINEST.log("Suppressed Exception on close().", e);
+        FINE.log("Suppressed Exception on close().", e);
       }
     }
   }
 
   def borrow[R <: AutoCloseable,A]( rsrc : =>R )( op : R => A ) : A = {
     var throwable : Throwable = null;
-    try { op( rsrc ) }
+    val r = rsrc;
+    try { op( r ) }
     catch {
       case t : Throwable => {
         throwable = t;
         throw t;
       }
     }
-    finally { attemptClose( rsrc, throwable ); }
+    finally { attemptClose( r, throwable ); }
   }
 
 }
