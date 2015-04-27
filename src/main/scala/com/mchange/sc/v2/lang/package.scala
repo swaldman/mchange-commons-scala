@@ -5,7 +5,7 @@ import com.mchange.sc.v1.log.MLevel._;
 
 package object lang {
 
-  implicit val logger = MLogger( "com.mchange.sc.v2.lang" );
+  implicit lazy val logger = MLogger( "com.mchange.sc.v2.lang" );
 
   def attemptClose( rsrc : AutoCloseable, t : Throwable ) = {
     try { if (rsrc != null) rsrc.close(); }

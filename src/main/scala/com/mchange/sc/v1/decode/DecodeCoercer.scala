@@ -4,7 +4,7 @@ import com.mchange.sc.v1.log._;
 import MLevel._;
 
 object DecodeCoercer {
-  implicit val logger = MLogger( this );
+  implicit lazy val logger = MLogger( this );
 }
 
 trait DecodeCoercer[T] {

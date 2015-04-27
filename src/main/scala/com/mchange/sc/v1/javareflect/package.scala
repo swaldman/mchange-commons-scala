@@ -41,7 +41,7 @@ import com.mchange.v2.log._;
 
 package object javareflect {
 
-  val logger : MLogger = MLog.getLogger( packageNameForPackageObject( this ) );
+  implicit lazy val logger : MLogger = MLog.getLogger( packageNameForPackageObject( this ) );
 
   def toClass( fqcn : String ) : Option[Class[_ <: AnyRef]] = try {
     Some( Class.forName( fqcn ).asInstanceOf[Class[_ <: AnyRef]] );

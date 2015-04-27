@@ -7,7 +7,7 @@ import akka.event.DummyClassForStringSources;
 import com.mchange.sc.v1.log._;
 
 object MLogLogger {
-  val log = MLogger( this );
+  implicit lazy val log = MLogger( this );
 }
 
 // adapted from akka.event.slf4j.Slf4jLogger
