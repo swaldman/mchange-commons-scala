@@ -12,7 +12,6 @@ class RestrictToThreadInvoker( threadName : String ) extends Invoker {
 
   val executorService  =  {
     val tf = new ThreadFactory {
-      var used = false;
       def newThread( runnable : Runnable ) : Thread = {
 	if (! used) {
 	  latch.countDown();
