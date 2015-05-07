@@ -42,7 +42,7 @@ object ImmutableArraySeq {
     def apply( source : Array[scala.Byte] )( implicit atag : scala.reflect.ClassTag[scala.Byte] ) = new ImmutableArraySeq.Byte( source.clone() )( atag );
 
     /**
-     * Be sure you know WTF you are doing, that nothing else mutates this array.
+     * Be sure you know WTF you are doing, that nothing else can possibly mutate this array.
      */  
     def createNoCopy( source : Array[scala.Byte] )( implicit atag : scala.reflect.ClassTag[scala.Byte] ) = new ImmutableArraySeq.Byte( source )( atag );
   }
@@ -53,6 +53,12 @@ object ImmutableArraySeq {
         case whatever                       => super.equals( whatever );
       }
     }
+
+    lazy val asBigInteger : java.math.BigInteger = new java.math.BigInteger( byteInner );
+    lazy val asBigInt     : BigInt               = BigInt( asBigInteger );
+
+    lazy val asUnsignedBigInteger : java.math.BigInteger = new java.math.BigInteger( 1, byteInner );
+    lazy val asUnsignedBigInt     : BigInt               = BigInt( asUnsignedBigInteger );
   }
 
   object Int {
