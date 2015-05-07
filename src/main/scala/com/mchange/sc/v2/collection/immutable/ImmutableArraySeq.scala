@@ -54,8 +54,8 @@ object ImmutableArraySeq {
       }
     }
 
-    lazy val asBigInteger : java.math.BigInteger = new java.math.BigInteger( byteInner );
-    lazy val asBigInt     : BigInt               = BigInt( asBigInteger );
+    lazy val asSignedBigInteger : java.math.BigInteger = new java.math.BigInteger( byteInner );
+    lazy val asSignedBigInt     : BigInt               = BigInt( asSignedBigInteger );
 
     lazy val asUnsignedBigInteger : java.math.BigInteger = new java.math.BigInteger( 1, byteInner );
     lazy val asUnsignedBigInt     : BigInt               = BigInt( asUnsignedBigInteger );
