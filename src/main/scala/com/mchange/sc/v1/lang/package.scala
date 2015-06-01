@@ -1,7 +1,7 @@
 /*
  * Distributed as part of mchange-commons-scala v0.4.0
  *
- * Copyright (C) 2013 Machinery For Change, Inc.
+ * Copyright (C) 2015 Machinery For Change, Inc.
  *
  * Author: Steve Waldman <swaldman@mchange.com>
  *
