@@ -47,7 +47,11 @@ package object failable {
 
   // kind of yuk, but we've renamed this from "Failure" to "Fail" to avoid inconvenient
   // need to qualify names when working with scala.util.Failure.
+  final object Fail {
+    def simple( message : String ) : Fail = Fail( message, message, None );
+  }
   final case class Fail( message : String, source : Any, mbStackTrace : Option[Array[StackTraceElement]] ) {
+
     override def toString() : String = mbStackTrace.fold( message ) { stackTrace =>
       (List( message ) ++ stackTrace).mkString( lineSeparator )
     }
@@ -82,20 +86,21 @@ package object failable {
       case Left( fail )   => fail.vomit;
       case Right( value ) => value;
     }
+    def fail : Fail = failable.left.get;
 
     // right-bias the Either, modified from Scala's RightProjection source
-    def foreach[U]( f : T => U )                        = failable.right.foreach( f );
-    def getOrElse[TT >: T](or : =>TT)                   = failable.right.getOrElse( or );
-    def forall( f : T => Boolean )                      = failable.right.forall( f );
-    def exists( f : T => Boolean)                       = failable.right.exists( f );
-    def flatMap[FF >: Fail, Y]( f: T => Either[FF, Y] ) = failable.right.flatMap( f );
-    def map[Y]( f: T => Y )                             = failable.right.map( f );
-    def filter( p: T => Boolean ) : Option[Failable[T]] = failable.right.filter( p );
-    def toSeq                                           = failable.right.toSeq;
-    def toOption                                        = failable.right.toOption;
+    def foreach[U]( f : T => U )                         = failable.right.foreach( f );
+    def getOrElse[TT >: T](or : =>TT)                    = failable.right.getOrElse( or );
+    def forall( f : T => Boolean )                       = failable.right.forall( f );
+    def exists( f : T => Boolean)                        = failable.right.exists( f );
+    def flatMap[FF >: Fail, Y]( f: T => Either[FF, Y] )  = failable.right.flatMap( f );
+    def map[Y]( f : T => Y )                             = failable.right.map( f );
+    def filter( p : T => Boolean ) : Option[Failable[T]] = failable.right.filter( p );
+    def toSeq                                            = failable.right.toSeq;
+    def toOption                                         = failable.right.toOption;
 
     //other methods
-    def flatten[U](implicit evidence: T <:< Failable[U]) : Failable[U] = {
+    def flatten[U](implicit evidence : T <:< Failable[U]) : Failable[U] = {
       failable match {
         case oops @ Left( _ )  => refail( oops );
         case        Right( t ) => evidence( t );
@@ -107,6 +112,8 @@ package object failable {
         case ok @ Right( _ )   => ok;
       }
     }
+    def recover[TT >: T]( recoveryValue : TT ) : Failable[TT] = recover( _ => recoveryValue )
+
     def fold[U]( f : Fail => U )( g : T => U ) : U = {
       failable match {
         case Left( fail ) => f( fail )
@@ -122,6 +129,18 @@ package object failable {
     def isSuccess : Boolean = failable.isRight;
     def isFail    : Boolean = !isSuccess;
     def isFailure : Boolean = isFail;
+
+    def toWarnable( recoveryFunction : Fail => T ) : Warnable[T] = {
+      def recoveryWarnable( oops : Fail ) = {
+        val recoveryValue = recoveryFunction( oops );
+        Warnable[T]( List( Fail.simple(s"Using recovery value: ${recoveryValue}"), oops ), recoveryValue );
+      }
+      this.fold( recoveryWarnable _ )( t => Warnable[T]( Nil, t ) )
+    }
+    def toWarnable( recovery : T ) : Warnable[T] = {
+      def recoveryWarnable( oops : Fail ) = Warnable[T]( List( Fail.simple(s"Using recovery default: ${recovery}"), oops ), recovery );
+      this.fold( recoveryWarnable _ )( t => Warnable[T]( Nil, t ) )
+    }
   }
 
   def fail[S : FailSource]( source : S, includeStackTrace : Boolean = true ) : Failable[Nothing] = {
@@ -156,22 +175,65 @@ package object failable {
   }
 
   implicit class FailableLoggingOps[T]( val failable : Failable[T] ) extends AnyVal {
-    def logFail( level : MLevel, premessage : =>String  = "" )( implicit logger : MLogger ) : Failable[T] = {
-      val pm = premessage; // avoid multiple executions of the by name expression
-      val prefix = if ( pm == "" || pm == null ) "" else pm + lineSeparator;
+    def log( level : MLevel, premessage : => String  = "" )( implicit logger : MLogger ) : Failable[T] = {
+      def doLog( oops : Fail ) = {
+        val pm = premessage; // avoid multiple executions of the by name expression
+        val prefix = if ( pm == "" || pm == null ) "" else pm + lineSeparator;
+        level.log( prefix + oops )( logger )
+      }
       failable match {
-        case Left( oops ) => level.log( prefix + oops )( logger )
+        case Left( oops ) => doLog( oops );
         case Right( _ )   => /* ignore */;
       }
       failable
     }
-    def warning( premessage : String = "" )( implicit logger : MLogger ) : Failable[T] = logFail( WARNING, premessage )( logger )
-    def severe( premessage : String = "" )( implicit logger : MLogger )  : Failable[T] = logFail( SEVERE, premessage )( logger )
-    def info( premessage : String = "" )( implicit logger : MLogger )    : Failable[T] = logFail( INFO, premessage )( logger )
-    def debug( premessage : String = "" )( implicit logger : MLogger )   : Failable[T] = logFail( DEBUG, premessage )( logger )
-    def trace( premessage : String = "" )( implicit logger : MLogger )   : Failable[T] = logFail( TRACE, premessage )( logger )
+    def logRecover[TT >: T]( level : MLevel, recoveryFunction : Fail => TT, premessage : => String )( implicit logger : MLogger ) : Failable[TT] = {
+      log( level, premessage )( logger ).recover( recoveryFunction );
+    }
+    def logRecover[TT >: T]( level : MLevel, recoveryFunction : Fail => TT )( implicit logger : MLogger ) : Failable[TT] = logRecover[TT]( level, recoveryFunction, "" )( logger );
 
-    def warn( premessage : String = "" )( implicit logger : MLogger ) : Failable[T] = warning( premessage )( logger )
+    def logRecover[TT >: T]( level : MLevel, recoveryValue : TT, premessage : => String )( implicit logger : MLogger ) : Failable[TT] = {
+      log( level, premessage )( logger ).recover( recoveryValue );
+    }
+    def logRecover[TT >: T]( level : MLevel, recoveryValue : TT )( implicit logger : MLogger ) : Failable[TT] = logRecover( level, recoveryValue, "" )( logger );
+
+    // is the API below just a little too cute?
+    def warning( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = log( WARNING, premessage )( logger )
+    def severe( premessage : => String = "" )( implicit logger : MLogger )  : Failable[T] = log( SEVERE, premessage )( logger )
+    def info( premessage : => String = "" )( implicit logger : MLogger )    : Failable[T] = log( INFO, premessage )( logger )
+    def debug( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = log( DEBUG, premessage )( logger )
+    def trace( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = log( TRACE, premessage )( logger )
+
+    def warn( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = warning( premessage )( logger )
+  }
+
+  case class Warnable[+T]( warnings : List[Fail], result : T ) {
+    def map[Y]( f : T => Y )               : Warnable[Y] = Warnable[Y]( this.warnings, f( result ) );
+    def flatMap[Y]( f : T => Warnable[Y] ) : Warnable[Y] = map( f ).flatten;
+    def clearWarnings                      : Warnable[T] = this.copy( warnings=Nil );
+  }
+  implicit class NestingWarnableOps[Y]( val nesting : Warnable[Warnable[Y]] ) extends AnyVal {
+    def flatten : Warnable[Y] = Warnable[Y]( nesting.result.warnings ::: nesting.warnings, nesting.result.result );
+  }
+
+  implicit class WarnableLoggingOps[T]( val warnable : Warnable[T] ) extends AnyVal {
+    private def logWarnings( level : MLevel, premessage : =>String, tag : =>String, clear : Boolean )( implicit logger : MLogger ) : Warnable[T] = {
+      if (! warnable.warnings.isEmpty ) { // avoid computation of by-name premessage if there is nothing to warn
+        val pm = premessage;              // avoid multiple computations of by-name premessage
+        val t = tag;
+        val linePrefix = if ( t == null ) "Execution Warning -> " else t;
+        if (pm != null && pm != "") level.log( pm );
+        warnable.warnings.foreach( oops => level.log( linePrefix + oops )( logger ) );
+        if (clear) warnable.clearWarnings else warnable
+      } else {
+        warnable
+      }
+    }
+    def log( level : MLevel = WARNING, premessage : =>String = null, tag : =>String = null )( implicit logger : MLogger ) = logWarnings( level, premessage, tag, false )( logger );
+    def logClear( level : MLevel = WARNING, premessage : =>String = null, tag : =>String = null )( implicit logger : MLogger ) = logWarnings( level, premessage, tag, true )( logger );
+
+    def debugLog( premessage : =>String = null, tag : =>String = null )( implicit logger : MLogger ) = log( DEBUG, premessage, tag )( logger );
+    def debugLogClear( premessage : =>String = null, tag : =>String = null )( implicit logger : MLogger ) = logClear( DEBUG, premessage, tag )( logger );
   }
 }
 
