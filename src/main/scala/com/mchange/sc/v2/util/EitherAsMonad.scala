@@ -15,33 +15,33 @@ object EitherAsMonad {
     def empty : T;
   }
   final object RightBiased {
-    implicit class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased[X,Y] ) {
-      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = tc.flatMap[XX,Z]( src )( f );
+    implicit class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased[X] ) {
+      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = tc.flatMap[XX,Y,Z]( src )( f );
       def map[Z]( f : Y => Z ) : Either[X,Z] = tc.map( src )( f );
       def withFilter( src : Either[X,Y] )( p : Y => Boolean ) : Either[X,Y] = tc.withFilter( src )( p );
     }
   }
-  abstract class RightBiased[X,Y]( val empty : X ) extends WithEmpty[X]{
+  abstract class RightBiased[X]( val empty : X ) extends WithEmpty[X]{
     val leftEmpty = Left(empty);
 
-    def flatMap[XX >: X, Z]( src : Either[X,Y] )( f : Y => Either[XX,Z] ) : Either[XX,Z] = {
+    def flatMap[XX >: X, Y, Z]( src : Either[X,Y] )( f : Y => Either[XX,Z] ) : Either[XX,Z] = {
       src match {
         case Left( _ )  => src.asInstanceOf[Left[X,Z]]
         case Right( y ) => f( y )
       }
     }
-    def map[Z]( src : Either[X,Y] )( f : Y => Z ) : Either[X,Z] = {
+    def map[Y,Z]( src : Either[X,Y] )( f : Y => Z ) : Either[X,Z] = {
       src match {
         case Left( _ )  => src.asInstanceOf[Left[X,Z]]
         case Right( y ) => Right( f( y ) )
       }
     }
-    def withFilter( src : Either[X,Y] )( p : Y => Boolean ) : Either[X,Y] = {
+    def withFilter[Y]( src : Either[X,Y] )( p : Y => Boolean ) : Either[X,Y] = {
       src match {
         case      Left( _ )  => src;
         case r @ Right( y ) => if ( p(y) ) r else leftEmpty;
       }
     }
-    implicit def toOps( src : Either[X,Y] ) : RightBiased.Ops[X,Y] = new RightBiased.Ops( src )( this )
+    implicit def toOps[Y]( src : Either[X,Y] ) : RightBiased.Ops[X,Y] = new RightBiased.Ops( src )( this )
   }
 }
