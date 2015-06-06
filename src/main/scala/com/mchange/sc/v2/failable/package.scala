@@ -35,10 +35,14 @@
 
 package com.mchange.sc.v2;
 
+import com.mchange.sc.v2.util.EitherAsMonad;
+
 import com.mchange.sc.v1.log.{MLogger,MLevel};
 import com.mchange.sc.v1.log.MLevel._;
 
 import scala.util.{Try, Success, Failure};
+
+import scala.language.implicitConversions;
 
 package object failable {
   class UnhandledFailException( fail : Fail ) extends Exception( fail.toString, fail.source match { case th : Throwable => th; case _ => null } );
@@ -49,6 +53,7 @@ package object failable {
   // need to qualify names when working with scala.util.Failure.
   final object Fail {
     def simple( message : String ) : Fail = Fail( message, message, None );
+    val EmptyFailable : Fail = Fail("An attempt to filter or pattern-match a Failable failed, leaving EmptyFailable.", "EmptyFailable", None);
   }
   final case class Fail( message : String, source : Any, mbStackTrace : Option[Array[StackTraceElement]] ) {
 
@@ -81,6 +86,10 @@ package object failable {
   type Failable[+T] = Either[Fail,T];
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
+  case object FailableAsMonadRightBiased extends EitherAsMonad.RightBiased[Fail,Nothing]( Fail.EmptyFailable );
+  implicit def failableAsModRightBiasedOps[T]( src : Failable[T] ) : EitherAsMonad.RightBiased.Ops[Fail,T] = {
+    new EitherAsMonad.RightBiased.Ops( src )( FailableAsMonadRightBiased.asInstanceOf[EitherAsMonad.RightBiased[Fail,T]] )
+  }
   implicit class FailableOps[T]( val failable : Failable[T] ) extends AnyVal {
     def get : T = failable match {
       case Left( fail )   => fail.vomit;
@@ -93,9 +102,9 @@ package object failable {
     def getOrElse[TT >: T](or : =>TT)                    = failable.right.getOrElse( or );
     def forall( f : T => Boolean )                       = failable.right.forall( f );
     def exists( f : T => Boolean)                        = failable.right.exists( f );
-    def flatMap[FF >: Fail, Y]( f: T => Either[FF, Y] )  = failable.right.flatMap( f );
-    def map[Y]( f : T => Y )                             = failable.right.map( f );
-    def filter( p : T => Boolean ) : Option[Failable[T]] = failable.right.filter( p );
+//    def flatMap[FF >: Fail, Y]( f: T => Either[FF, Y] )  = failable.right.flatMap( f );
+//    def map[Y]( f : T => Y )                             = failable.right.map( f );
+//    def filter( p : T => Boolean ) : Option[Failable[T]] = failable.right.filter( p );
     def toSeq                                            = failable.right.toSeq;
     def toOption                                         = failable.right.toOption;
 

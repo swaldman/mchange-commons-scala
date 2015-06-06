@@ -1,5 +1,7 @@
 package com.mchange.sc.v2.util;
 
+import scala.language.implicitConversions;
+
 import scala.util.{Either,Left,Right}
 
 object EitherAsMonad {
@@ -11,6 +13,13 @@ object EitherAsMonad {
     */ 
   trait WithEmpty[+T] {
     def empty : T;
+  }
+  final object RightBiased {
+    implicit class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased[X,Y] ) {
+      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = tc.flatMap[XX,Z]( src )( f );
+      def map[Z]( f : Y => Z ) : Either[X,Z] = tc.map( src )( f );
+      def withFilter( src : Either[X,Y] )( p : Y => Boolean ) : Either[X,Y] = tc.withFilter( src )( p );
+    }
   }
   abstract class RightBiased[X,Y]( val empty : X ) extends WithEmpty[X]{
     val leftEmpty = Left(empty);
@@ -33,5 +42,6 @@ object EitherAsMonad {
         case r @ Right( y ) => if ( p(y) ) r else leftEmpty;
       }
     }
+    implicit def toOps( src : Either[X,Y] ) : RightBiased.Ops[X,Y] = new RightBiased.Ops( src )( this )
   }
 }
