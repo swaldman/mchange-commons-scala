@@ -10,7 +10,7 @@ object EitherAsMonad {
   }
   final object RightBiased {
 
-    private final val OpsMethods = WithEmptyToken.Throwable( throw new MatchError( matchErrorMessage( true ) ) );   
+    private[EitherAsMonad] final val OpsMethods = WithEmptyToken.Throwable( throw new MatchError( matchErrorMessage( true ) ) );   
 
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
@@ -116,7 +116,7 @@ object EitherAsMonad {
           }
         }
 
-        implicit def toOps[X>:E,Y]( src : Either[X,Y] ) : RightBiased.WithEmptyToken.Ops[X,Y] = new RightBiased.WithEmptyToken.Ops( src )( this )
+        implicit def toOps[X>:E,Y]( src : Either[X,Y] ) : RightBiased.WithEmptyToken.Ops[X,Y] = new RightBiased.WithEmptyToken.Ops[X,Y]( src )( this )
       }
       def apply[E]( token : E ) : WithEmptyToken[E] = new WithEmptyToken( token );
 
@@ -127,9 +127,14 @@ object EitherAsMonad {
         override def empty : Nothing = throw throwableBuilder;
       }
     }
-    final class WithEmptyToken[E] private( override val empty : E ) extends WithEmptyToken.Generic[E] {
+    final class WithEmptyToken[+E] private( override val empty : E ) extends WithEmptyToken.Generic[E] {
       override protected val leftEmpty : Left[E,Nothing] = Left(empty);
     }
+  }
+  trait RightBiased[X] {
+    val EmptyTokenDefinition : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] = RightBiased.OpsMethods;
+
+    implicit def toRightBiasedEtherOps[Y]( src : Either[X,Y] ) : RightBiased.WithEmptyToken.AbstractOps[X,Y] = new RightBiased.WithEmptyToken.Ops[X,Y]( src )( EmptyTokenDefinition );
   }
   final object LeftBiased {
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal {
