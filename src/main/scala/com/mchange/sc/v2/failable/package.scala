@@ -87,25 +87,12 @@ package object failable {
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
   final object FailableAsMonad extends EitherAsMonad.RightBiased.WithEmptyToken[Fail]( Fail.EmptyFailable );
-  implicit def failableAsMonadRightBiasedOps[T]( src : Failable[T] ) : EitherAsMonad.RightBiased.WithEmptyToken.Ops[Fail,T] = FailableAsMonad.toOps( src );
-  implicit class FailableOps[T]( val failable : Failable[T] ) extends AnyVal {
-    def get : T = failable match {
+  implicit final class FailableOps[T]( failable : Failable[T] ) extends EitherAsMonad.RightBiased.WithEmptyTokenFactory.AbstractOps( failable )( FailableAsMonad ) {
+    override def get : T = failable match {
       case Left( fail )   => fail.vomit;
       case Right( value ) => value;
     }
     def fail : Fail = failable.left.get;
-
-    // right-bias the Either, modified from Scala's RightProjection source
-    def foreach[U]( f : T => U )                         = failable.right.foreach( f );
-    def getOrElse[TT >: T](or : =>TT)                    = failable.right.getOrElse( or );
-    def forall( f : T => Boolean )                       = failable.right.forall( f );
-    def exists( f : T => Boolean)                        = failable.right.exists( f );
-//    def flatMap[FF >: Fail, Y]( f: T => Either[FF, Y] )  = failable.right.flatMap( f );
-//    def map[Y]( f : T => Y )                             = failable.right.map( f );
-//    def filter( p : T => Boolean ) : Option[Failable[T]] = failable.right.filter( p );
-    def toSeq                                            = failable.right.toSeq;
-    def toOption                                         = failable.right.toOption;
-
     //other methods
     def flatten[U](implicit evidence : T <:< Failable[U]) : Failable[U] = {
       failable match {

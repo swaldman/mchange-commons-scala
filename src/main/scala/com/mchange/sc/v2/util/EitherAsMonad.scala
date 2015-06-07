@@ -9,74 +9,33 @@ object EitherAsMonad {
     def empty : T;
   }
   final object RightBiased {
+
+    private final object OpsMethods extends WithEmptyTokenFactory[Nothing] {
+      def empty : Nothing = throw new MatchError( matchErrorMessage( true ) );   
+    }
+    private def opsMethods[X] : WithEmptyTokenFactory[X] = OpsMethods.asInstanceOf[WithEmptyTokenFactory[X]];
+
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
       // monad ops
-      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = {
-        src match {
-          case Left( _ )  => src.asInstanceOf[Left[X,Z]]
-          case Right( y ) => f( y )
-        }
-      }
-      def map[Z]( f : Y => Z ) : Either[X,Z] = {
-        src match {
-          case Left( _ )  => src.asInstanceOf[Left[X,Z]]
-          case Right( y ) => Right( f( y ) )
-        }
-      }
-      def withFilter( p : Y => Boolean ) : Either[X,Y] = {
-        src match {
-          case      Left( _ )  => src;
-          case r @ Right( y ) => if ( p(y) ) r else throw new MatchError( matchErrorMessage( true, src ) );
-        }
-      }
+      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = opsMethods[X].flatMap[XX,Y,Z]( src )( f );
+      def map[Z]( f : Y => Z )                         : Either[X,Z]  = opsMethods[X].map( src )( f );
+      def withFilter( p : Y => Boolean )               : Either[X,Y]  = opsMethods[X].withFilter( src )( p );
 
       // extra ops
-      def exists( f : Y => Boolean ) : Boolean = {
-        src match {
-          case Left( _ )  => false;
-          case Right( y ) => f( y );
-        }
-      }
-      def forall( f : Y => Boolean ) : Boolean = {
-        src match {
-          case Left( _ )  => true;
-          case Right( y ) => f( y );
-        }
-      }
-      def foreach[U]( f : Y => U ) : Any = {
-        src match {
-          case Left( _ )  => ();
-          case Right( y ) => f( y );
-        }
-      }
-      def get : Y = {
-        src match {
-          case Left( _ )  => throw new NoSuchElementException( NoSuchRightMessage );
-          case Right( y ) => y;
-        }
-      }
-      def getOrElse[ YY >: Y ]( or : =>YY ) : YY = {
-        src match {
-          case Left( _ )  => or;
-          case Right( y ) => y;
-        }
-      }
-      def toOption : Option[Y] = {
-        src match {
-          case Left( _ )  => None;
-          case Right( y ) => Some( y );
-        }
-      }
-      def toSeq : collection.Seq[Y] = {
-        src match {
-          case Left( _ )  => collection.Seq.empty[Y];
-          case Right( y ) => collection.Seq( y );
-        }
-      }
+      def exists( f : Y => Boolean )        : Boolean           = opsMethods[X].exists( src )( f );
+      def forall( f : Y => Boolean )        : Boolean           = opsMethods[X].forall( src )( f );
+      def foreach[U]( f : Y => U )          : Any               = opsMethods[X].foreach( src )( f );
+      def get                               : Y                 = opsMethods[X].get( src );
+      def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = opsMethods[X].getOrElse[Y,YY]( src )( or );
+      def toOption                          : Option[Y]         = opsMethods[X].toOption( src );
+      def toSeq                             : collection.Seq[Y] = opsMethods[X].toSeq( src );
     }
-    final object WithEmptyToken {
-      implicit class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased.WithEmptyToken[X] ) {
+    abstract class WithEmptyToken[X]( val empty : X ) extends WithEmptyTokenFactory[X] {
+      override protected val leftEmpty = Left(empty);
+    }
+    final object WithEmptyTokenFactory {
+      abstract class AbstractOps[X,Y]( src : Either[X,Y] )( tc : EitherAsMonad.RightBiased.WithEmptyTokenFactory[X] ) {
 
         // monad ops
         def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = tc.flatMap[XX,Y,Z]( src )( f );
@@ -92,9 +51,11 @@ object EitherAsMonad {
         def toOption                          : Option[Y]         = tc.toOption( src );
         def toSeq                             : collection.Seq[Y] = tc.toSeq( src );
       }
+
+      implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased.WithEmptyTokenFactory[X] ) extends AbstractOps( src )( tc );
     }
-    abstract class WithEmptyToken[X]( val empty : X ) extends EitherAsMonad.WithEmptyToken[X]{
-      val leftEmpty = Left(empty);
+    trait WithEmptyTokenFactory[X] extends EitherAsMonad.WithEmptyToken[X]{
+      protected def leftEmpty = Left(empty);
 
       // monad ops
       def flatMap[XX >: X, Y, Z]( src : Either[X,Y] )( f : Y => Either[XX,Z] ) : Either[XX,Z] = {
@@ -160,7 +121,7 @@ object EitherAsMonad {
         }
       }
 
-      implicit def toOps[Y]( src : Either[X,Y] ) : RightBiased.WithEmptyToken.Ops[X,Y] = new RightBiased.WithEmptyToken.Ops( src )( this )
+      implicit def toOps[Y]( src : Either[X,Y] ) : RightBiased.WithEmptyTokenFactory.Ops[X,Y] = new RightBiased.WithEmptyTokenFactory.Ops( src )( this )
     }
   }
   final object LeftBiased {
@@ -181,7 +142,7 @@ object EitherAsMonad {
       }
       def withFilter( p : X => Boolean ) : Either[X,Y] = {
         src match {
-          case l @ Left( x )  => if ( p(x) ) l else throw new MatchError( matchErrorMessage( false, src ) );
+          case l @ Left( x )  => if ( p(x) ) l else throw new MatchError( matchErrorMessage( false, Some(src) ) );
           case     Right( _ ) => src;
         }
       }
@@ -319,10 +280,11 @@ object EitherAsMonad {
     }
   }
 
-  private def matchErrorMessage[X,Y]( rightBiased : Boolean, either : Either[X,Y] ) = {
+  private def matchErrorMessage[X,Y]( rightBiased : Boolean, mbEither : Option[Either[X,Y]] = None ) = {
     val bias = if ( rightBiased ) "Right-biased" else "Left-biased";
     val withToken = if ( rightBiased ) "RightBiased.WithToken" else "LeftBiased.WithToken";
-    s"${bias} Either '${either}' filtered or would have no value as unmatched pattern. Consider implementing ${withToken}"
+    val eitherRep = mbEither.fold(" ")( either => s" '${either}' " );
+    s"${bias} Either${eitherRep}filtered or would have no value as unmatched pattern. Consider implementing ${withToken}"
   }
 
   private val NoSuchLeftMessage = "Can't get a value from a LeftBiased Either which is in fact a Right.";
