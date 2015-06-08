@@ -10,7 +10,7 @@ object EitherAsMonad {
   }
   final object RightBiased {
 
-    private[EitherAsMonad] final val OpsMethods = WithEmptyToken.Throwable( throw new MatchError( matchErrorMessage( true ) ) );   
+    private[EitherAsMonad] final val OpsMethods = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( true ) ) );   
 
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
@@ -120,10 +120,10 @@ object EitherAsMonad {
       }
       def apply[E]( token : E ) : WithEmptyToken[E] = new WithEmptyToken( token );
 
-      object Throwable {
-        def apply( throwableBuilder : =>java.lang.Throwable ) : Throwable = new Throwable( throwableBuilder );
+      object Throwing {
+        def apply( throwableBuilder : =>java.lang.Throwable ) : Throwing = new Throwing( throwableBuilder );
       }
-      final class Throwable private( throwableBuilder : =>java.lang.Throwable ) extends WithEmptyToken.Generic[Nothing] {
+      final class Throwing private( throwableBuilder : =>java.lang.Throwable ) extends WithEmptyToken.Generic[Nothing] {
         override def empty : Nothing = throw throwableBuilder;
       }
     }
