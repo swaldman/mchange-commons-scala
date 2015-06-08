@@ -27,6 +27,8 @@ object EitherAsMonad {
       def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = OpsMethods.getOrElse[X,Y,YY]( src )( or );
       def toOption                          : Option[Y]         = OpsMethods.toOption( src );
       def toSeq                             : collection.Seq[Y] = OpsMethods.toSeq( src );
+
+      def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = OpsMethods.fold( src )( ifLeft )( ifRight )
     }
 
     object WithEmptyToken {
@@ -45,6 +47,8 @@ object EitherAsMonad {
         def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = tc.getOrElse[X,Y,YY]( src )( or );
         def toOption                          : Option[Y]         = tc.toOption( src );
         def toSeq                             : collection.Seq[Y] = tc.toSeq( src );
+
+        def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = tc.fold( src )( ifLeft )( ifRight )
       }
 
       implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] ) extends AbstractOps( src )( tc );
@@ -113,6 +117,12 @@ object EitherAsMonad {
           src match {
             case Left( _ )  => collection.Seq.empty[Y];
             case Right( y ) => collection.Seq( y );
+          }
+        }
+        def fold[X>:E,Y,Z]( src : Either[X,Y] )( ifLeft : X => Z )( ifRight : Y => Z ) : Z = {
+          src match {
+            case Left( x ) => ifLeft( x );
+            case Right( y ) => ifRight( y );
           }
         }
 

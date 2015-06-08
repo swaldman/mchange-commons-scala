@@ -108,18 +108,6 @@ package object failable {
     }
     def recover[TT >: T]( recoveryValue : TT ) : Failable[TT] = recover( _ => recoveryValue )
 
-    def fold[U]( f : Fail => U )( g : T => U ) : U = {
-      failable match {
-        case Left( fail ) => f( fail )
-        case Right( t )   => g( t );
-      }
-    }
-    def fold[U]( u : U )( g : T => U ) : U = {
-      failable match {
-        case Left( fail ) => u
-        case Right( t )   => g( t );
-      }
-    }
     def isSuccess : Boolean = failable.isRight;
     def isFail    : Boolean = !isSuccess;
     def isFailure : Boolean = isFail;
