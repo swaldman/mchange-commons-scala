@@ -10,48 +10,48 @@ object EitherAsMonad {
   }
   final object RightBiased {
 
-    private[EitherAsMonad] final val OpsMethods = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( true ) ) );
+    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( true ) ) );
 
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
       // monad ops
-      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = OpsMethods.flatMap[X,XX,Y,Z]( src )( f );
-      def map[Z]( f : Y => Z )                         : Either[X,Z]  = OpsMethods.map( src )( f );
-      def withFilter( p : Y => Boolean )               : Either[X,Y]  = OpsMethods.withFilter( src )( p );
+      def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = DefaultThrowingOps.flatMap[X,XX,Y,Z]( src )( f );
+      def map[Z]( f : Y => Z )                         : Either[X,Z]  = DefaultThrowingOps.map( src )( f );
+      def withFilter( p : Y => Boolean )               : Either[X,Y]  = DefaultThrowingOps.withFilter( src )( p );
 
       // extra ops
-      def exists( f : Y => Boolean )        : Boolean           = OpsMethods.exists( src )( f );
-      def forall( f : Y => Boolean )        : Boolean           = OpsMethods.forall( src )( f );
-      def foreach[U]( f : Y => U )          : Any               = OpsMethods.foreach( src )( f );
-      def get                               : Y                 = OpsMethods.get( src );
-      def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = OpsMethods.getOrElse[X,Y,YY]( src )( or );
-      def toOption                          : Option[Y]         = OpsMethods.toOption( src );
-      def toSeq                             : collection.Seq[Y] = OpsMethods.toSeq( src );
+      def exists( f : Y => Boolean )        : Boolean           = DefaultThrowingOps.exists( src )( f );
+      def forall( f : Y => Boolean )        : Boolean           = DefaultThrowingOps.forall( src )( f );
+      def foreach[U]( f : Y => U )          : Any               = DefaultThrowingOps.foreach( src )( f );
+      def get                               : Y                 = DefaultThrowingOps.get( src );
+      def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = DefaultThrowingOps.getOrElse[X,Y,YY]( src )( or );
+      def toOption                          : Option[Y]         = DefaultThrowingOps.toOption( src );
+      def toSeq                             : collection.Seq[Y] = DefaultThrowingOps.toSeq( src );
 
-      def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = OpsMethods.fold( src )( ifLeft )( ifRight )
+      def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = DefaultThrowingOps.fold( src )( ifLeft )( ifRight )
     }
 
     object WithEmptyToken {
-      abstract class AbstractOps[X,Y]( src : Either[X,Y] )( tc : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] ) {
+      abstract class AbstractOps[X,Y]( src : Either[X,Y] )( opsTypeClass : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] ) {
 
         // monad ops
-        def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = tc.flatMap[X,XX,Y,Z]( src )( f );
-        def map[Z]( f : Y => Z )                         : Either[X,Z]  = tc.map( src )( f );
-        def withFilter( p : Y => Boolean )               : Either[X,Y]  = tc.withFilter( src )( p );
+        def flatMap[XX >: X, Z]( f : Y => Either[XX,Z] ) : Either[XX,Z] = opsTypeClass.flatMap[X,XX,Y,Z]( src )( f );
+        def map[Z]( f : Y => Z )                         : Either[X,Z]  = opsTypeClass.map( src )( f );
+        def withFilter( p : Y => Boolean )               : Either[X,Y]  = opsTypeClass.withFilter( src )( p );
 
         // extra ops
-        def exists( f : Y => Boolean )        : Boolean           = tc.exists( src )( f );
-        def forall( f : Y => Boolean )        : Boolean           = tc.forall( src )( f );
-        def foreach[U]( f : Y => U )          : Any               = tc.foreach( src )( f );
-        def get                               : Y                 = tc.get( src );
-        def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = tc.getOrElse[X,Y,YY]( src )( or );
-        def toOption                          : Option[Y]         = tc.toOption( src );
-        def toSeq                             : collection.Seq[Y] = tc.toSeq( src );
+        def exists( f : Y => Boolean )        : Boolean           = opsTypeClass.exists( src )( f );
+        def forall( f : Y => Boolean )        : Boolean           = opsTypeClass.forall( src )( f );
+        def foreach[U]( f : Y => U )          : Any               = opsTypeClass.foreach( src )( f );
+        def get                               : Y                 = opsTypeClass.get( src );
+        def getOrElse[ YY >: Y ]( or : =>YY ) : YY                = opsTypeClass.getOrElse[X,Y,YY]( src )( or );
+        def toOption                          : Option[Y]         = opsTypeClass.toOption( src );
+        def toSeq                             : collection.Seq[Y] = opsTypeClass.toSeq( src );
 
-        def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = tc.fold( src )( ifLeft )( ifRight )
+        def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = opsTypeClass.fold( src )( ifLeft )( ifRight )
       }
 
-      implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] ) extends AbstractOps( src )( tc );
+      implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit opsTypeClass : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] ) extends AbstractOps( src )( opsTypeClass );
 
       trait Generic[+E] extends EitherAsMonad.WithEmpty[E]{
         protected def leftEmpty : Left[E,Nothing] = Left(empty);
@@ -142,54 +142,54 @@ object EitherAsMonad {
     }
   }
   trait RightBiased[X] {
-    val EmptyTokenDefinition : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] = RightBiased.OpsMethods;
+    val EmptyTokenDefinition : EitherAsMonad.RightBiased.WithEmptyToken.Generic[X] = RightBiased.DefaultThrowingOps;
 
     implicit def toRightBiasedEtherOps[Y]( src : Either[X,Y] ) : RightBiased.WithEmptyToken.AbstractOps[X,Y] = new RightBiased.WithEmptyToken.Ops[X,Y]( src )( EmptyTokenDefinition );
   }
   final object LeftBiased {
 
-    private[EitherAsMonad] final val OpsMethods = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( false ) ) );
+    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( false ) ) );
 
     implicit class Ops[X,Y]( val src : Either[X,Y] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
       // monad ops
-      def flatMap[YY >: Y, Z]( f : X => Either[Z,YY] ) : Either[Z,YY] = OpsMethods.flatMap[X,Y,YY,Z]( src )( f );
-      def map[Z]( f : X => Z )                         : Either[Z,Y]  = OpsMethods.map( src )( f );
-      def withFilter( p : X => Boolean )               : Either[X,Y]  = OpsMethods.withFilter( src )( p );
+      def flatMap[YY >: Y, Z]( f : X => Either[Z,YY] ) : Either[Z,YY] = DefaultThrowingOps.flatMap[X,Y,YY,Z]( src )( f );
+      def map[Z]( f : X => Z )                         : Either[Z,Y]  = DefaultThrowingOps.map( src )( f );
+      def withFilter( p : X => Boolean )               : Either[X,Y]  = DefaultThrowingOps.withFilter( src )( p );
 
       // extra ops
-      def exists( f : X => Boolean )       : Boolean           = OpsMethods.exists( src )( f );
-      def forall( f : X => Boolean )       : Boolean           = OpsMethods.forall( src )( f );
-      def foreach[U]( f : X => U )         : Any               = OpsMethods.foreach( src )( f );
-      def get                              : X                 = OpsMethods.get( src );
-      def getOrElse[XX >: X ]( or : =>XX ) : XX                = OpsMethods.getOrElse[X,XX,Y]( src )( or );
-      def toOption                         : Option[X]         = OpsMethods.toOption( src );
-      def toSeq                            : collection.Seq[X] = OpsMethods.toSeq( src );
+      def exists( f : X => Boolean )       : Boolean           = DefaultThrowingOps.exists( src )( f );
+      def forall( f : X => Boolean )       : Boolean           = DefaultThrowingOps.forall( src )( f );
+      def foreach[U]( f : X => U )         : Any               = DefaultThrowingOps.foreach( src )( f );
+      def get                              : X                 = DefaultThrowingOps.get( src );
+      def getOrElse[XX >: X ]( or : =>XX ) : XX                = DefaultThrowingOps.getOrElse[X,XX,Y]( src )( or );
+      def toOption                         : Option[X]         = DefaultThrowingOps.toOption( src );
+      def toSeq                            : collection.Seq[X] = DefaultThrowingOps.toSeq( src );
    
-      def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = OpsMethods.fold( src )( ifLeft )( ifRight )
+      def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = DefaultThrowingOps.fold( src )( ifLeft )( ifRight )
     }
 
     object WithEmptyToken {
-      abstract class AbstractOps[X,Y]( src : Either[X,Y] )( tc : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] ) {
+      abstract class AbstractOps[X,Y]( src : Either[X,Y] )( opsTypeClass : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] ) {
 
         // monad ops
-        def flatMap[YY >: Y, Z]( f : X => Either[Z,YY] ) : Either[Z,YY] = tc.flatMap[X,Y,YY,Z]( src )( f );
-        def map[Z]( f : X => Z )                         : Either[Z,Y]  = tc.map( src )( f );
-        def withFilter( p : X => Boolean )               : Either[X,Y]  = tc.withFilter( src )( p );
+        def flatMap[YY >: Y, Z]( f : X => Either[Z,YY] ) : Either[Z,YY] = opsTypeClass.flatMap[X,Y,YY,Z]( src )( f );
+        def map[Z]( f : X => Z )                         : Either[Z,Y]  = opsTypeClass.map( src )( f );
+        def withFilter( p : X => Boolean )               : Either[X,Y]  = opsTypeClass.withFilter( src )( p );
 
         // extra ops
-        def exists( f : X => Boolean )       : Boolean           = tc.exists( src )( f );
-        def forall( f : X => Boolean )       : Boolean           = tc.forall( src )( f );
-        def foreach[U]( f : X => U )         : Any               = tc.foreach( src )( f );
-        def get                              : X                 = tc.get( src );
-        def getOrElse[XX >: X ]( or : =>XX ) : XX                = tc.getOrElse[X,XX,Y]( src )( or );
-        def toOption                         : Option[X]         = tc.toOption( src );
-        def toSeq                            : collection.Seq[X] = tc.toSeq( src );
+        def exists( f : X => Boolean )       : Boolean           = opsTypeClass.exists( src )( f );
+        def forall( f : X => Boolean )       : Boolean           = opsTypeClass.forall( src )( f );
+        def foreach[U]( f : X => U )         : Any               = opsTypeClass.foreach( src )( f );
+        def get                              : X                 = opsTypeClass.get( src );
+        def getOrElse[XX >: X ]( or : =>XX ) : XX                = opsTypeClass.getOrElse[X,XX,Y]( src )( or );
+        def toOption                         : Option[X]         = opsTypeClass.toOption( src );
+        def toSeq                            : collection.Seq[X] = opsTypeClass.toSeq( src );
 
-        def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = OpsMethods.fold( src )( ifLeft )( ifRight )
+        def fold[Z]( ifLeft : X => Z )( ifRight : Y => Z ) : Z = opsTypeClass.fold( src )( ifLeft )( ifRight )
       }
 
-      implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit tc : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] ) extends AbstractOps( src )( tc );
+      implicit final class Ops[X,Y]( src : Either[X,Y] )( implicit opsTypeClass : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] ) extends AbstractOps( src )( opsTypeClass );
 
       trait Generic[+E] extends EitherAsMonad.WithEmpty[E]{
         protected def rightEmpty : Right[Nothing,E] = Right(empty);
@@ -257,7 +257,7 @@ object EitherAsMonad {
             case Right( _ ) => collection.Seq.empty[X];
           }
         }
-        def fold[X>:E,Y,Z]( src : Either[X,Y] )( ifLeft : X => Z )( ifRight : Y => Z ) : Z = {
+        def fold[X,Y>:E,Z]( src : Either[X,Y] )( ifLeft : X => Z )( ifRight : Y => Z ) : Z = {
           src match {
             case Left( x ) => ifLeft( x );
             case Right( y ) => ifRight( y );
@@ -280,7 +280,7 @@ object EitherAsMonad {
     }
   } 
   trait LeftBiased[Y] {
-    val EmptyTokenDefinition : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] = LeftBiased.OpsMethods;
+    val EmptyTokenDefinition : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[Y] = LeftBiased.DefaultThrowingOps;
 
     implicit def toLeftBiasedEtherOps[X]( src : Either[X,Y] ) : LeftBiased.WithEmptyToken.AbstractOps[X,Y] = new LeftBiased.WithEmptyToken.Ops[X,Y]( src )( EmptyTokenDefinition );
   }
