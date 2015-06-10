@@ -117,11 +117,11 @@ package object failable {
         val recoveryValue = recoveryFunction( oops );
         Warnable[T]( List( Fail.simple(s"Using recovery value: ${recoveryValue}"), oops ), recoveryValue );
       }
-      this.fold( recoveryWarnable _ )( t => Warnable[T]( Nil, t ) )
+      failable.fold( recoveryWarnable _, t => Warnable[T]( Nil, t ) )
     }
     def toWarnable( recovery : T ) : Warnable[T] = {
       def recoveryWarnable( oops : Fail ) = Warnable[T]( List( Fail.simple(s"Using recovery default: ${recovery}"), oops ), recovery );
-      this.fold( recoveryWarnable _ )( t => Warnable[T]( Nil, t ) )
+      failable.fold( recoveryWarnable _, t => Warnable[T]( Nil, t ) )
     }
   }
 
