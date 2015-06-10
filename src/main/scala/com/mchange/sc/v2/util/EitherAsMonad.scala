@@ -10,7 +10,7 @@ object EitherAsMonad {
   }
   final object RightBiased {
 
-    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( true ) ) );
+    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new NoSuchElementException( noSuchElementMessage( true ) ) );
 
     implicit class Ops[A,B]( val src : Either[A,B] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
@@ -27,8 +27,6 @@ object EitherAsMonad {
       def getOrElse[ BB >: B ]( or : =>BB ) : BB                = DefaultThrowingOps.getOrElse[A,B,BB]( src )( or );
       def toOption                          : Option[B]         = DefaultThrowingOps.toOption( src );
       def toSeq                             : collection.Seq[B] = DefaultThrowingOps.toSeq( src );
-
-      def fold[Z]( ifLeft : A => Z )( ifRight : B => Z ) : Z = DefaultThrowingOps.fold( src )( ifLeft )( ifRight )
     }
 
     object WithEmptyToken {
@@ -47,8 +45,6 @@ object EitherAsMonad {
         def getOrElse[ BB >: B ]( or : =>BB ) : BB                = opsTypeClass.getOrElse[A,B,BB]( src )( or );
         def toOption                          : Option[B]         = opsTypeClass.toOption( src );
         def toSeq                             : collection.Seq[B] = opsTypeClass.toSeq( src );
-
-        def fold[Z]( ifLeft : A => Z )( ifRight : B => Z ) : Z = opsTypeClass.fold( src )( ifLeft )( ifRight )
       }
 
       implicit final class Ops[A,B]( src : Either[A,B] )( implicit opsTypeClass : EitherAsMonad.RightBiased.WithEmptyToken.Generic[A] ) extends AbstractOps( src )( opsTypeClass );
@@ -119,12 +115,6 @@ object EitherAsMonad {
             case Right( b ) => collection.Seq( b );
           }
         }
-        def fold[A>:E,B,Z]( src : Either[A,B] )( ifLeft : A => Z )( ifRight : B => Z ) : Z = {
-          src match {
-            case Left( a ) => ifLeft( a );
-            case Right( b ) => ifRight( b );
-          }
-        }
 
         implicit def toOps[A>:E,B]( src : Either[A,B] ) : RightBiased.WithEmptyToken.Ops[A,B] = new RightBiased.WithEmptyToken.Ops[A,B]( src )( this )
       }
@@ -148,7 +138,7 @@ object EitherAsMonad {
   }
   final object LeftBiased {
 
-    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new MatchError( matchErrorMessage( false ) ) );
+    private[EitherAsMonad] final val DefaultThrowingOps = WithEmptyToken.Throwing( throw new NoSuchElementException( noSuchElementMessage( false ) ) );
 
     implicit class Ops[A,B]( val src : Either[A,B] ) extends AnyVal { // alas, we don't define a trait, but write all these ops twice, so we can avoid boxing here
 
@@ -165,8 +155,6 @@ object EitherAsMonad {
       def getOrElse[AA >: A ]( or : =>AA ) : AA                = DefaultThrowingOps.getOrElse[A,AA,B]( src )( or );
       def toOption                         : Option[A]         = DefaultThrowingOps.toOption( src );
       def toSeq                            : collection.Seq[A] = DefaultThrowingOps.toSeq( src );
-   
-      def fold[Z]( ifLeft : A => Z )( ifRight : B => Z ) : Z = DefaultThrowingOps.fold( src )( ifLeft )( ifRight )
     }
 
     object WithEmptyToken {
@@ -185,8 +173,6 @@ object EitherAsMonad {
         def getOrElse[AA >: A ]( or : =>AA ) : AA                = opsTypeClass.getOrElse[A,AA,B]( src )( or );
         def toOption                         : Option[A]         = opsTypeClass.toOption( src );
         def toSeq                            : collection.Seq[A] = opsTypeClass.toSeq( src );
-
-        def fold[Z]( ifLeft : A => Z )( ifRight : B => Z ) : Z = opsTypeClass.fold( src )( ifLeft )( ifRight )
       }
 
       implicit final class Ops[A,B]( src : Either[A,B] )( implicit opsTypeClass : EitherAsMonad.LeftBiased.WithEmptyToken.Generic[B] ) extends AbstractOps( src )( opsTypeClass );
@@ -257,12 +243,6 @@ object EitherAsMonad {
             case Right( _ ) => collection.Seq.empty[A];
           }
         }
-        def fold[A,B>:E,Z]( src : Either[A,B] )( ifLeft : A => Z )( ifRight : B => Z ) : Z = {
-          src match {
-            case Left( a ) => ifLeft( a );
-            case Right( b ) => ifRight( b );
-          }
-        }
 
         implicit def toOps[A,B>:E]( src : Either[A,B] ) : LeftBiased.WithEmptyToken.Ops[A,B] = new LeftBiased.WithEmptyToken.Ops[A,B]( src )( this )
       }
@@ -285,7 +265,7 @@ object EitherAsMonad {
     implicit def toLeftBiasedEtherOps[A]( src : Either[A,B] ) : LeftBiased.WithEmptyToken.AbstractOps[A,B] = new LeftBiased.WithEmptyToken.Ops[A,B]( src )( EmptyTokenDefinition );
   }
 
-  private def matchErrorMessage[A,B]( rightBiased : Boolean, mbEither : Option[Either[A,B]] = None ) = {
+  private def noSuchElementMessage[A,B]( rightBiased : Boolean, mbEither : Option[Either[A,B]] = None ) = {
     val bias = if ( rightBiased ) "Right-biased" else "Left-biased";
     val withToken = if ( rightBiased ) "RightBiased.WithEmptyToken" else "LeftBiased.WithEmptyToken";
     val eitherRep = mbEither.fold(" ")( either => s" '${either}' " );
