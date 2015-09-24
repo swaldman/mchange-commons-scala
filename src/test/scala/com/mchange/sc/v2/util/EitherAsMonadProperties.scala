@@ -10,7 +10,7 @@ object EitherAsMonadProperties extends Properties("EitherAsMonad") {
     Arbitrary[Either[X, Y]](Gen.oneOf(arbitrary[X].map(Left(_)), arbitrary[Y].map(Right(_))))
 
   object CheckLeftBiased {
-    import EitherAsMonad.LeftBiased._
+    import EitherAsMonad.LeftBias._
 
     val prop_value = forAll((n: Int) => Left(n).get == n)
 
@@ -94,7 +94,7 @@ object EitherAsMonadProperties extends Properties("EitherAsMonad") {
   }
 
   object CheckLeftBiasedWithEmptyToken {
-    val Bias = EitherAsMonad.LeftBiased.WithEmptyToken(-1);
+    val Bias = EitherAsMonad.LeftBias.withEmptyToken(-1);
     import Bias._;
 
     val prop_withFilter = forAll((e: Either[Int, Int] ) => {
@@ -118,7 +118,7 @@ object EitherAsMonadProperties extends Properties("EitherAsMonad") {
   }
 
   object CheckRightBiased {
-    import EitherAsMonad.RightBiased._
+    import EitherAsMonad.RightBias._
 
     val prop_value = forAll((n: Int) => Right(n).get == n)
 
@@ -202,7 +202,7 @@ object EitherAsMonadProperties extends Properties("EitherAsMonad") {
   }
 
   object CheckRightBiasedWithEmptyToken {
-    val Bias = EitherAsMonad.RightBiased.WithEmptyToken(-1);
+    val Bias = EitherAsMonad.RightBias.withEmptyToken(-1);
     import Bias._;
 
     val prop_withFilter = forAll((e: Either[Int, Int] ) => {

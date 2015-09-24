@@ -86,8 +86,8 @@ package object failable {
   type Failable[+T] = Either[Fail,T];
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
-  private val FailableAsMonad = EitherAsMonad.RightBiased.WithEmptyToken[Fail]( Fail.EmptyFailable );
-  implicit final class FailableOps[T]( failable : Failable[T] ) extends EitherAsMonad.RightBiased.WithEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
+  private val FailableAsMonad = EitherAsMonad.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
+  implicit final class FailableOps[T]( failable : Failable[T] ) extends EitherAsMonad.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
     override def get : T = failable match {
       case Left( fail )   => fail.vomit;
       case Right( value ) => value;
