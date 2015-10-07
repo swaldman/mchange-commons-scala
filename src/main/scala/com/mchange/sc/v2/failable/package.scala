@@ -85,6 +85,12 @@ package object failable {
 
   type Failable[+T] = Either[Fail,T];
 
+  val  Succeeded     = Right;
+  type Succeeded[+T] = Right[Fail,T];
+
+  val  Failed     = Left;
+  type Failed[+T] = Left[Fail,T];
+
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
   private val FailableAsMonad = EitherAsMonad.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
   implicit final class FailableOps[T]( failable : Failable[T] ) extends EitherAsMonad.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
@@ -108,9 +114,11 @@ package object failable {
     }
     def recover[TT >: T]( recoveryValue : TT ) : Failable[TT] = recover( _ => recoveryValue )
 
-    def isSuccess : Boolean = failable.isRight;
-    def isFail    : Boolean = !isSuccess;
-    def isFailure : Boolean = isFail;
+    def isSucceeded : Boolean = failable.isRight;
+    def isFailed    : Boolean = !isSucceeded;
+
+    def asSucceeded[TT >: T] : Succeeded[TT] = failable.asInstanceOf[Succeeded[TT]]
+    def asFailed[TT >: T] : Failed[TT]       = failable.asInstanceOf[Failed[TT]] 
 
     def toWarnable( recoveryFunction : Fail => T ) : Warnable[T] = {
       def recoveryWarnable( oops : Fail ) = {
@@ -134,7 +142,7 @@ package object failable {
   /**
    * A utility to re-establish the irrelevant right type as universally acceptable Nothing
    */  
-  def refail( prefail : Left[Fail,Any] ) : Failable[Nothing] = prefail.asInstanceOf[Failable[Nothing]]
+  def refail( prefail : Failed[Any] ) : Failable[Nothing] = prefail.asInstanceOf[Failable[Nothing]]
 
   def succeed[T]( value : T ) : Failable[T] = Right( value );
 

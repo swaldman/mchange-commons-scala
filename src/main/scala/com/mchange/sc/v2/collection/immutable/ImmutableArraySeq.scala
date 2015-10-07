@@ -71,6 +71,11 @@ object ImmutableArraySeq {
         }
       }
     }
+
+    override def copyToArray[B >: A](xs: Array[B], start: scala.Int, len: scala.Int): Unit = {
+      val lenToCopy = math.min( xs.length - start, len )
+      System.arraycopy( inner, 0, xs, start, lenToCopy )
+    }
   }
 
   object Byte {
