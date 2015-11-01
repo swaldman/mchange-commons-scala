@@ -37,7 +37,7 @@ package com.mchange.sc.v2.collection.immutable;
 
 import scala.collection._;
 
-import java.util.Arrays;
+import java.util.{Arrays,Random};
 
 object ImmutableArraySeq {
   def apply[A]( source : Array[A] )( implicit atag : scala.reflect.ClassTag[A] ) = new ImmutableArraySeq[A]( source.clone() )( atag );
@@ -85,6 +85,12 @@ object ImmutableArraySeq {
      * Be sure you know WTF you are doing, that nothing else can possibly mutate this array.
      */  
     def createNoCopy( source : Array[scala.Byte] )( implicit atag : scala.reflect.ClassTag[scala.Byte] ) = new ImmutableArraySeq.Byte( source )( atag );
+
+    def random( len : scala.Int )( random : Random ) = {
+      val tmp = Array.ofDim[scala.Byte]( len )
+      random.nextBytes( tmp )
+      apply( tmp )
+    }
   }
   final class Byte private ( private val byteInner : Array[scala.Byte] )( implicit atag : scala.reflect.ClassTag[scala.Byte] ) extends Abstract[scala.Byte]( byteInner ) {
     override def equals( o : Any ) : Boolean = {
