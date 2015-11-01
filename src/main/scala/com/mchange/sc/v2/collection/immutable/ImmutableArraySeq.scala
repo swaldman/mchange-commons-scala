@@ -62,7 +62,7 @@ object ImmutableArraySeq {
           val src = inner
           val len = src.length;
           val out = btag.newArray( len );
-          System.arraycopy( src, 0, out, 0, len );
+          Array.copy( src, 0, out, 0, len );
           out
         }
       } catch {
@@ -74,7 +74,7 @@ object ImmutableArraySeq {
 
     override def copyToArray[B >: A](xs: Array[B], start: scala.Int, len: scala.Int): Unit = {
       val lenToCopy = math.min( xs.length - start, len )
-      System.arraycopy( inner, 0, xs, start, lenToCopy )
+      Array.copy( inner, 0, xs, start, lenToCopy )
     }
   }
 
