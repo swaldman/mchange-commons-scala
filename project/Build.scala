@@ -57,6 +57,7 @@ object MchangeCommonsScalaBuild extends Build {
     "com.typesafe" % "config" % "1.0.0" % "compile,optional",
     "org.specs2"  %% "specs2" % "2.4.6" % "test",
     "com.mchange" %% "mlog-scala" % "0.3.7",
+    "com.mchange" %% "leftright" % "0.0.1",
     "com.mchange" % "mchange-commons-java" % "0.2.10"
   );
 

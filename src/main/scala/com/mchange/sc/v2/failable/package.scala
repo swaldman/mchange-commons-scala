@@ -35,7 +35,7 @@
 
 package com.mchange.sc.v2;
 
-import com.mchange.sc.v2.util.EitherAsMonad;
+import com.mchange.leftright.BiasedEither;
 
 import com.mchange.sc.v1.log.{MLogger,MLevel};
 import com.mchange.sc.v1.log.MLevel._;
@@ -92,8 +92,8 @@ package object failable {
   type Failed[+T] = Left[Fail,T];
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
-  private val FailableAsMonad = EitherAsMonad.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
-  implicit final class FailableOps[T]( failable : Failable[T] ) extends EitherAsMonad.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
+  private val FailableAsMonad = BiasedEither.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
+  implicit final class FailableOps[T]( failable : Failable[T] ) extends BiasedEither.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
     override def get : T = failable match {
       case Left( fail )   => fail.vomit;
       case Right( value ) => value;
