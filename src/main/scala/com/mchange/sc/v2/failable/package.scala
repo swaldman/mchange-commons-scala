@@ -57,7 +57,7 @@ package object failable {
   }
   final case class Fail( message : String, source : Any, mbStackTrace : Option[Array[StackTraceElement]] ) {
 
-    override def toString() : String = mbStackTrace.fold( message ) { stackTrace =>
+    override def toString() : String = "Fail:" + mbStackTrace.fold( message ) { stackTrace =>
       (List( message ) ++ stackTrace).mkString( lineSeparator )
     }
     def vomit : Nothing = throw new UnhandledFailException( this );
