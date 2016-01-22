@@ -39,6 +39,7 @@ import scala.collection._;
 
 import java.util.{Arrays,Random};
 
+// TODO: Abstract away commonalities in factories...
 object ImmutableArraySeq {
   def apply[A]( source : Array[A] )( implicit atag : scala.reflect.ClassTag[A] ) = new ImmutableArraySeq[A]( source.clone() )( atag );
 
@@ -107,6 +108,23 @@ object ImmutableArraySeq {
     lazy val asUnsignedBigInt     : BigInt               = BigInt( asUnsignedBigInteger );
   }
 
+  object Double {
+    def apply( source : Array[scala.Double] )( implicit atag : scala.reflect.ClassTag[scala.Double] ) = new ImmutableArraySeq.Double( source.clone() )( atag );
+
+    /**
+     * Be sure you know WTF you are doing, that nothing else can possibly mutate this array.
+     */  
+    def createNoCopy( source : Array[scala.Double] )( implicit atag : scala.reflect.ClassTag[scala.Double] ) = new ImmutableArraySeq.Double( source )( atag );
+  }
+  final class Double private ( private val doubleInner : Array[scala.Double] )( implicit atag : scala.reflect.ClassTag[scala.Double] ) extends Abstract[scala.Double]( doubleInner ) {
+    override def equals( o : Any ) : Boolean = {
+      o match {
+        case other : ImmutableArraySeq.Double => Arrays.equals( this.doubleInner, other.doubleInner );
+        case whatever                         => super.equals( whatever );
+      }
+    }
+  }
+
   object Int {
     def apply( source : Array[scala.Int] )( implicit atag : scala.reflect.ClassTag[scala.Int] ) = new ImmutableArraySeq.Int( source.clone() )( atag );
 
@@ -120,6 +138,23 @@ object ImmutableArraySeq {
       o match {
         case other : ImmutableArraySeq.Int => Arrays.equals( this.intInner, other.intInner );
         case whatever                      => super.equals( whatever );
+      }
+    }
+  }
+
+  object Long {
+    def apply( source : Array[scala.Long] )( implicit atag : scala.reflect.ClassTag[scala.Long] ) = new ImmutableArraySeq.Long( source.clone() )( atag );
+
+    /**
+     * Be sure you know WTF you are doing, that nothing else mutates this array.
+     */  
+    def createNoCopy( source : Array[scala.Long] )( implicit atag : scala.reflect.ClassTag[scala.Long] ) = new ImmutableArraySeq.Long( source )( atag );
+  }
+  final class Long private ( private val longInner : Array[scala.Long] )( implicit atag : scala.reflect.ClassTag[scala.Long] ) extends Abstract[scala.Long]( longInner ) {
+    override def equals( o : Any ) : Boolean = {
+      o match {
+        case other : ImmutableArraySeq.Long => Arrays.equals( this.longInner, other.longInner );
+        case whatever                       => super.equals( whatever );
       }
     }
   }
