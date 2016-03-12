@@ -42,8 +42,8 @@ package object lang {
 
   implicit lazy val logger = MLogger( "com.mchange.sc.v2.lang" );
 
-  def attemptClose( rsrc : AutoCloseable, t : Throwable ) = {
-    try { if (rsrc != null) rsrc.close(); }
+  def attemptClose( resource : AutoCloseable, t : Throwable ) = {
+    try { if (resource != null) resource.close(); }
     catch {
       case e : Exception => {
         if ( t != null )
@@ -53,9 +53,20 @@ package object lang {
     }
   }
 
-  def borrow[R <: AutoCloseable,A]( rsrc : =>R )( op : R => A ) : A = {
+  def attemptDestroy[R]( resource : R, destroy : R => Any, t : Throwable ) = {
+    try { if (resource != null) destroy( resource ); }
+    catch {
+      case e : Exception => {
+        if ( t != null )
+          t.addSuppressed( e );
+        FINE.log("Suppressed Exception on destroy.", e);
+      }
+    }
+  }
+
+  def borrow[R <: AutoCloseable,A]( resource : =>R )( op : R => A ) : A = {
     var throwable : Throwable = null;
-    val r = rsrc;
+    val r = resource;
     try { op( r ) }
     catch {
       case t : Throwable => {
@@ -66,4 +77,17 @@ package object lang {
     finally { attemptClose( r, throwable ); }
   }
 
+  def borrow[R,A]( resource : =>R )( destroy : R => Any )( op : R => A ) : A = {
+    var throwable : Throwable = null;
+    val r = resource;
+    try { op( r ) }
+    catch {
+      case t : Throwable => {
+        throwable = t;
+        throw t;
+      }
+    }
+    finally { attemptDestroy( r, destroy, throwable ); }
+  }
 }
+
