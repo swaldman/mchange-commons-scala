@@ -43,5 +43,4 @@ package object concurrent {
   def awaitAndGatherIndexedFailures[L,T]( seq : Seq[Future[T]], timeout : Duration = Duration.Inf )( implicit cbf : CBF[T], ec : ExecutionContext ) : Seq[(Int,Throwable)] = {
     awaitAndGatherLabeledFailures( (0 until seq.length).zip(seq) )( cbf, ec )
   }
-
 }
