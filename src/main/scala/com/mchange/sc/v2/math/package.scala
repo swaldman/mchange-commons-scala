@@ -40,15 +40,12 @@ package object math {
     productLog( z, seed, precision, maxIterations )
   }
 
-  private[math] final val MinInt = Integer.MIN_VALUE
-  private[math] final val MaxInt = Integer.MAX_VALUE
-
   implicit class RichLong( val long : Long ) extends AnyVal {
     def toIntExact : Int = {
-      if ( long >= MinInt && long <= MaxInt ) {
+      if ( long.isValidInt ) {
         long.toInt
       } else {
-        throw new ArithmeticException( s"${long}L cannot be converted to Int, not in range [${MinInt},${MaxInt}]" )
+        throw new ArithmeticException( s"${long}L cannot be converted to Int (not in range [${Integer.MIN_VALUE},${Integer.MAX_VALUE})" )
       }
     }
   }
