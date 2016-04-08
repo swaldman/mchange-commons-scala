@@ -39,5 +39,18 @@ package object math {
   def lambertW( z : Double, seed : Double = 0, precision : Double = 0.00001, maxIterations : Int = 10000 ) : Double = {
     productLog( z, seed, precision, maxIterations )
   }
+
+  private[math] final val MinInt = Integer.MIN_VALUE
+  private[math] final val MaxInt = Integer.MAX_VALUE
+
+  implicit class RichLong( val long : Long ) extends AnyVal {
+    def toIntExact : Int = {
+      if ( long >= MinInt && long <= MaxInt ) {
+        long.toInt
+      } else {
+        throw new ArithmeticException( s"${long}L cannot be converted to Int, not in range [${MinInt},${MaxInt}]" )
+      }
+    }
+  }
 }
 
