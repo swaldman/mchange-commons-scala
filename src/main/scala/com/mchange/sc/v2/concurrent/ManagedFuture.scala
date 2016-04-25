@@ -13,6 +13,13 @@ import scala.util.Try
 object ManagedFuture {
   final class RegistrationStateException( message : String ) extends Exception( message )
 
+  object Manager {
+    import scala.util.Random
+    import scala.math.abs
+
+    def apply( name : String ) : Manager = new Manager( name )
+    def create( name : String = s"ManagedFuture.Manager-${abs(Random.nextLong)}" ) = apply( name )
+  }
   class Manager( val name : String ) {
 
     // MT: protected by this' lock
@@ -20,6 +27,10 @@ object ManagedFuture {
     private[this] var failureList : List[Throwable] = Nil
     private[this] var registrationsClosed = false
 
+    /**
+      * Don't forget to call closeRegistrations(), or this
+      * will await forever!
+      */ 
     def await() : Unit = this.synchronized {
       while (!allDone) this.wait()
     }
