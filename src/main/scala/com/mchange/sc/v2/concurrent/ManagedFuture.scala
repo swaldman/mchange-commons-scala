@@ -55,6 +55,15 @@ object ManagedFuture {
         throw new RegistrationStateException(s"Registrations have been closed on ${this}")
       count += 1
     }
+
+    /**
+      *  called in the rare case that a future cannot be instantiated following registration
+      *  on that future's behalf
+      */
+    private[ManagedFuture] def withdrawRegistration() = this.synchronized {
+      count -= 1
+      checkNotify()
+    }
     private[ManagedFuture] def markSuccess() : Unit = this.synchronized {
       count -= 1
       checkNotify()
@@ -71,35 +80,83 @@ object ManagedFuture {
     override def toString() = s"ManagedFuture.Manager(${name})"
   }
 
-  def apply[T]( manager : Manager )( body : =>T )( implicit executor : ExecutionContext ) = new ManagedFuture( manager, body )( executor )
-}
-class ManagedFuture[T] private ( manager : ManagedFuture.Manager, body : => T )( implicit ec : ExecutionContext ) extends Future[T] {
-  val inner = Future {
-    try {
-      manager.register()
-      val out = body
-      manager.markSuccess()
-      out
-    } catch {
-      case t : Throwable => {
-        manager.markFailure(t)
-        throw t
+  def apply[T]( manager : Manager )( body : =>T )( implicit executor : ExecutionContext ) : ManagedFuture[T] = new Uncertain( manager, body )( executor )
+
+  /**
+    * This is "managed" in the sense that it will throw an Exception to the caller
+    * if registrations have been closed on the manager.
+    */
+  def successful[T]( manager : Manager )( goodT : T ) : ManagedFuture[T] = new Presucceeded[T]( manager, goodT )
+
+  /**
+    * This is "managed" in the sense that it will throw an Exception to the caller
+    * if registrations have been closed on the manager, and the failures
+    * will be recorded among the manager's failures.
+    */
+  def failed[T]( manager : Manager )( failure : Throwable ) : ManagedFuture[T] = new Prefailed[T]( manager, failure )
+
+  trait Base[T] extends ManagedFuture[T] {
+    val inner : Future[T]
+
+    def isCompleted : Boolean = inner.isCompleted
+
+    def onComplete[U](f : (Try[T]) => U)(implicit executor: ExecutionContext) : Unit = inner.onComplete(f)(executor)
+
+    def ready( atMost : Duration )( implicit permit : CanAwait ) : Base.this.type = {
+      inner.ready( atMost )( permit )
+      this
+    }
+
+    def result( atMost : Duration )( implicit permit : CanAwait ) : T = {
+      inner.result( atMost )( permit )
+    }
+
+    def value : Option[Try[T]] = inner.value
+  }
+
+  class Uncertain[T] private[ManagedFuture] ( manager : ManagedFuture.Manager, body : => T )( implicit ec : ExecutionContext ) extends Base[T] {
+    val inner = {
+      // we've gotto register synchronously, so that clients can guarantee
+      // regsitrations happen before manager.closeRegistration()
+      manager.register() 
+      try {
+        Future {
+          try {
+            val out = body
+            manager.markSuccess()
+            out
+          } catch {
+            case t : Throwable => {
+              manager.markFailure(t)
+              throw t
+            }
+          }
+        }
+      } catch {
+        case t : Throwable => {
+          manager.withdrawRegistration()
+          throw t
+        }
       }
     }
   }
-
-  def isCompleted : Boolean = inner.isCompleted
-
-  def onComplete[U](f : (Try[T]) => U)(implicit executor: ExecutionContext) : Unit = inner.onComplete(f)(executor)
-
-  def ready( atMost : Duration )( implicit permit : CanAwait ) : ManagedFuture.this.type = {
-    inner.ready( atMost )( permit )
-    this
+  class Presucceeded[T] private[ManagedFuture] ( manager : Manager, goodT : T ) extends Base[T] {
+    // seems like overkill, but we need to throw the Exception if registrations are closed
+    val inner = {
+      val out = Future.successful[T]( goodT )
+      manager.register() 
+      manager.markSuccess()
+      out
+    }
   }
-
-  def result( atMost : Duration )( implicit permit : CanAwait ) : T = {
-    inner.result( atMost )( permit )
+  class Prefailed[T] private[ManagedFuture] ( manager : Manager, failure : Throwable ) extends Base[T] {
+    // seems like overkill, but we need to throw the Exception if registrations are closed
+    val inner = {
+      val out = Future.failed[T]( failure )
+      manager.register() 
+      manager.markFailure( failure )
+      out
+    }
   }
-
-  def value : Option[Try[T]] = inner.value
 }
+sealed trait ManagedFuture[T] extends Future[T]
