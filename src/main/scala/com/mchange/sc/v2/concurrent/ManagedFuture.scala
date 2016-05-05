@@ -132,7 +132,7 @@ object ManagedFuture {
             }
           }
         }
-      } catch {
+      } catch { // note that this does not catch the prior throw within Future{...}, which is in a different Thread
         case t : Throwable => {
           manager.withdrawRegistration()
           throw t
