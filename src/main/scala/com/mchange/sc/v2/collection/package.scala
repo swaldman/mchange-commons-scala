@@ -28,4 +28,14 @@ package object collection {
       accum.flatMap( m => if (m.contains(next._1)) Left(next._1) else Right(m + next) )
     }
   }
+
+  /**
+    * Returns as Right the successfully constructed SortedMap if there were no duplicate keys,
+    * as Left the first duplicate key encounted if there were duplicate keys
+    */ 
+  def seqToSortedMapIfNoDupKeys[K,V]( seq : Seq[(K,V)] )( implicit ordering : Ordering[K] ) : Either[K,scimmutable.SortedMap[K,V]] = {
+    seq.foldLeft(Right(scimmutable.SortedMap.empty[K,V]) : Either[K,scimmutable.SortedMap[K,V]]) { (accum, next) =>
+      accum.flatMap( m => if (m.contains(next._1)) Left(next._1) else Right(m + next) )
+    }
+  }
 }
