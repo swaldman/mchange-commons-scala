@@ -83,6 +83,9 @@ package object failable {
     override def getStackTrace( source : Throwable ) = source.getStackTrace;
   }
 
+  object Failable {
+    def apply[T]( block : =>T ) = Try( block ).toFailable
+  }
   type Failable[+T] = Either[Fail,T];
 
   val  Succeeded     = Right;
@@ -93,6 +96,7 @@ package object failable {
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
   private val FailableAsMonad = BiasedEither.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
+
   implicit final class FailableOps[T]( failable : Failable[T] ) extends BiasedEither.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
     override def get : T = failable match {
       case Left( fail )   => fail.vomit;
