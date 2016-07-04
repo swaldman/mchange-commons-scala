@@ -35,9 +35,11 @@
 
 package com.mchange.sc.v2.collection.immutable;
 
-import scala.collection._;
+import scala.collection._
 
-import java.util.{Arrays,Random};
+import java.util.{Arrays,Random}
+
+import com.mchange.lang.ByteUtils
 
 // TODO: Abstract away commonalities in factories...
 object ImmutableArraySeq {
@@ -106,6 +108,8 @@ object ImmutableArraySeq {
 
     lazy val asUnsignedBigInteger : java.math.BigInteger = new java.math.BigInteger( 1, byteInner );
     lazy val asUnsignedBigInt     : BigInt               = BigInt( asUnsignedBigInteger );
+
+    override def toString() : String = s"ImmutableArraySeq.Byte(0x${ByteUtils.toLowercaseHexAscii( byteInner )})"
   }
 
   object Double {
