@@ -57,7 +57,7 @@ package object failable {
   }
   final case class Fail( message : String, source : Any, mbStackTrace : Option[Array[StackTraceElement]] ) {
 
-    override def toString() : String = "Fail:" + mbStackTrace.fold( message ) { stackTrace =>
+    override def toString() : String = "Fail: " + mbStackTrace.fold( message ) { stackTrace =>
       (List( message ) ++ stackTrace).mkString( lineSeparator )
     }
     def vomit : Nothing = throw new UnhandledFailException( this );
@@ -151,6 +151,7 @@ package object failable {
   def succeed[T]( value : T ) : Failable[T] = Right( value );
 
   val Poop : PartialFunction[Throwable, Failable[Nothing]] = { case scala.util.control.NonFatal( t : Throwable ) => fail( t ) }
+  val ToFailable = Poop
 
   implicit class FailableTry[T]( val attempt : Try[T] ) extends AnyVal {
     def toFailable : Failable[T] = attempt match {
