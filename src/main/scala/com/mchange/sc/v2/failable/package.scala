@@ -170,7 +170,7 @@ package object failable {
   }
 
   implicit class FailableLoggingOps[T]( val failable : Failable[T] ) extends AnyVal {
-    def log( level : MLevel, premessage : => String  = "" )( implicit logger : MLogger ) : Failable[T] = {
+    def xlog( level : MLevel, premessage : => String  = "" )( implicit logger : MLogger ) : Failable[T] = {
       def doLog( oops : Fail ) = {
         val pm = premessage; // avoid multiple executions of the by name expression
         val prefix = if ( pm == "" || pm == null ) "" else pm + lineSeparator;
@@ -183,23 +183,23 @@ package object failable {
       failable
     }
     def logRecover[TT >: T]( level : MLevel, recoveryFunction : Fail => TT, premessage : => String )( implicit logger : MLogger ) : Failable[TT] = {
-      log( level, premessage )( logger ).recover( recoveryFunction );
+      xlog( level, premessage )( logger ).recover( recoveryFunction );
     }
     def logRecover[TT >: T]( level : MLevel, recoveryFunction : Fail => TT )( implicit logger : MLogger ) : Failable[TT] = logRecover[TT]( level, recoveryFunction, "" )( logger );
 
     def logRecover[TT >: T]( level : MLevel, recoveryValue : TT, premessage : => String )( implicit logger : MLogger ) : Failable[TT] = {
-      log( level, premessage )( logger ).recover( recoveryValue );
+      xlog( level, premessage )( logger ).recover( recoveryValue );
     }
     def logRecover[TT >: T]( level : MLevel, recoveryValue : TT )( implicit logger : MLogger ) : Failable[TT] = logRecover( level, recoveryValue, "" )( logger );
 
     // is the API below just a little too cute?
-    def warning( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = log( WARNING, premessage )( logger )
-    def severe( premessage : => String = "" )( implicit logger : MLogger )  : Failable[T] = log( SEVERE, premessage )( logger )
-    def info( premessage : => String = "" )( implicit logger : MLogger )    : Failable[T] = log( INFO, premessage )( logger )
-    def debug( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = log( DEBUG, premessage )( logger )
-    def trace( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = log( TRACE, premessage )( logger )
+    def xwarning( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = xlog( WARNING, premessage )( logger )
+    def xsevere( premessage : => String = "" )( implicit logger : MLogger )  : Failable[T] = xlog( SEVERE, premessage )( logger )
+    def xinfo( premessage : => String = "" )( implicit logger : MLogger )    : Failable[T] = xlog( INFO, premessage )( logger )
+    def xdebug( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = xlog( DEBUG, premessage )( logger )
+    def xtrace( premessage : => String = "" )( implicit logger : MLogger )   : Failable[T] = xlog( TRACE, premessage )( logger )
 
-    def warn( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = warning( premessage )( logger )
+    def xwarn( premessage : => String = "" )( implicit logger : MLogger ) : Failable[T] = xwarning( premessage )( logger )
   }
 
   case class Warnable[+T]( warnings : List[Fail], result : T ) {
