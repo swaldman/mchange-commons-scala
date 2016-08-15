@@ -176,9 +176,11 @@ package object failable {
     }
   }
 
+  private val FailableTrue = succeed( true )
+
   implicit class FailableBoolean( val b : Boolean ) extends AnyVal {
     def toFailable[ U : FailSource ]( source : U = "No information available." ) : Failable[Boolean] = {
-      if (b) succeed( b ) else fail( source )
+      if (b) FailableTrue else fail( source )
     }
   }
 
