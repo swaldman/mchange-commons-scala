@@ -169,6 +169,12 @@ package object failable {
     }
   }
 
+  implicit class FailableBoolean( val b : Boolean ) extends AnyVal {
+    def toFailable[ U : FailSource ]( source : U = "No information available." ) : Failable[Boolean] = {
+      if (b) succeed( b ) else fail( source )
+    }
+  }
+
   implicit class FailableLoggingOps[T]( val failable : Failable[T] ) extends AnyVal {
     def xlog( level : MLevel, premessage : => String  = "" )( implicit logger : MLogger ) : Failable[T] = {
       def doLog( oops : Fail ) = {
