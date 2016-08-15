@@ -44,6 +44,8 @@ import scala.util.{Try, Success, Failure};
 
 import scala.language.implicitConversions;
 
+import scala.collection._
+
 package object failable {
   class UnhandledFailException( fail : Fail ) extends Exception( fail.toString, fail.source match { case th : Throwable => th; case _ => null } );
 
@@ -84,6 +86,11 @@ package object failable {
   }
 
   object Failable {
+    def sequence[T]( failables : Seq[Failable[T]] ) : Failable[immutable.Seq[T]] = {
+      failables.foldLeft( succeed( immutable.Seq.empty[T] ) ){ ( fseq, fnext ) =>
+        fseq.flatMap( seq => fnext.map( next => seq :+ next ) )
+      }
+    }
     def apply[T]( block : =>T ) = Try( block ).toFailable
   }
   type Failable[+T] = Either[Fail,T];
