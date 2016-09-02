@@ -125,6 +125,8 @@ package object failable {
     }
     def recover[TT >: T]( recoveryValue : TT ) : Failable[TT] = recover( _ => recoveryValue )
 
+    def orElse[TT >: T]( other : =>Failable[TT] ) : Failable[TT] = if ( failable.isSucceeded ) failable else other
+
     def isSucceeded : Boolean = failable.isRight;
     def isFailed    : Boolean = !isSucceeded;
 
