@@ -1,10 +1,34 @@
 package com.mchange.sc.v2
 
-import java.sql.ResultSet
+import com.mchange.sc.v2.lang.borrow
+
+import java.sql.{Connection,PreparedStatement,ResultSet}
+
+import scala.util.control.NonFatal
 
 package object sql {
 
   final class UnexpectedRowCountException( message : String ) extends Exception( message )
+
+  def borrowTransact[T]( connectionSource : =>Connection )( block : Connection => T ) : T = borrow( connectionSource )( conn => transact( conn )( block ) )
+
+  def transact[T]( conn : Connection )( block : Connection => T ) : T = {
+    val origAutoCommit = conn.getAutoCommit()
+
+    try {
+      conn.setAutoCommit(false)
+      val out = block( conn )
+      conn.commit()
+      out
+    } catch {
+      case NonFatal( t ) => {
+        conn.rollback()
+        throw t
+      }
+    } finally {
+      conn.setAutoCommit( origAutoCommit )
+    }
+  }
 
   def getSingleValue[T]( extractor : ResultSet => T)( rs : ResultSet ) : T = {
     if (! rs.next() ) throw new UnexpectedRowCountException("A result set expected to contain precisely one row contained no rows at all")
@@ -37,4 +61,7 @@ package object sql {
   def getMaybeSingleFloat( rs : ResultSet )   = getMaybeSingleValue( _.getFloat(1) )( rs )
   def getMaybeSingleDouble( rs : ResultSet )  = getMaybeSingleValue( _.getDouble(1) )( rs )
 
+  def setMaybeString( sqlType : Int )( ps : PreparedStatement, index : Int, mbValue : Option[String] )  : Unit = {
+    mbValue.fold( ps.setNull( index, sqlType ) )( value => ps.setString( index, value ) )
+  }
 }
