@@ -58,7 +58,7 @@ object MchangeCommonsScalaBuild extends Build {
     "org.specs2"  %% "specs2" % "2.4.6" % "test",
     "com.mchange" %% "mlog-scala" % "0.3.9",
     "com.mchange" %% "leftright" % "0.0.1",
-    "com.mchange" % "mchange-commons-java" % "0.2.12"
+    "com.mchange" % "mchange-commons-java" % "0.2.13-SNAPSHOT"
   );
 
   override lazy val settings = super.settings ++ mySettings;
