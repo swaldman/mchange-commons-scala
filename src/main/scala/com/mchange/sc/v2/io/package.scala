@@ -2,14 +2,31 @@ package com.mchange.sc.v2;
 
 import lang.borrow
 
-import scala.io.Codec
+import scala.io.{Codec,Source}
 
 import java.io._
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
+import java.nio.file.{Paths, Files, StandardOpenOption}
 
 package object io {
+  val K128 = 128 * 1024
+
   def withPrintWriter[T]( file : File, bufferLen : Int )( op : PrintWriter => T )( implicit codec : Codec ) : T = {
     borrow( new PrintWriter( new OutputStreamWriter( new BufferedOutputStream( new FileOutputStream( file ), bufferLen ), codec.charSet ) ) )( op )
+  }
+
+  implicit class RichFile( val file : File ) extends AnyVal {
+    def contentsAsString( bufferSize : Int, codec : Codec ) : String = {
+      borrow( Source.fromFile( file, bufferSize )( codec ) )( _.close )( _.mkString )
+    }
+    def contentsAsString( codec : Codec ) : String = this.contentsAsString( K128, codec )
+
+    def contentsAsString : String = this.contentsAsString( Codec.default )
+
+    def replaceContents( string : String, codec : Codec = Codec.default ) = {
+      Files.write( file.toPath, string.getBytes( codec.charSet ) )
+    }
+    def appendContents( string : String, codec : Codec = Codec.default ) = {
+      Files.write( file.toPath, string.getBytes( codec.charSet ), StandardOpenOption.APPEND )
+    }
   }
 }

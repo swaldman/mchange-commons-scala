@@ -38,7 +38,7 @@ object MchangeCommonsScalaBuild extends Build {
             //"org.scala-lang.modules" %% "scala-xml" % "1.0.1",
             //"org.scala-lang.modules" %% "scala-swing" % "1.0.1",
             "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2",
-            "org.scala-lang" % "scala-reflect" % "2.11.2"
+            "org.scala-lang" % "scala-reflect" % Keys.scalaVersion.value
           )
         }
         case _ => {
@@ -54,7 +54,7 @@ object MchangeCommonsScalaBuild extends Build {
 
   val dependencies = Seq(
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
-    "com.typesafe" % "config" % "1.0.0" % "compile,optional",
+    "com.typesafe" % "config" % "1.2.1" % "compile,optional",
     "org.specs2"  %% "specs2" % "2.4.6" % "test",
     "com.mchange" %% "mlog-scala" % "0.3.9",
     "com.mchange" %% "leftright" % "0.0.1",
