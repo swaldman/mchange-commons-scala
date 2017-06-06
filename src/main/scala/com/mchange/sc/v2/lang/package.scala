@@ -89,5 +89,15 @@ package object lang {
     }
     finally { attemptDestroy( r, destroy, throwable ); }
   }
+  /**
+    *  When resource types become autocloseble in new versions of Scala, code that used to
+    *  be compiled using the 3 arg list borrow instead become interpreted as a function call
+    *  on the result of the two arg list version.
+    * 
+    *  To ensure consistent use of the 3-arglist version, modify the code to use borrowExplicit
+    * 
+    *  See, for example, the source code for com.mchange.sc.v2.io.RichFile.contentsAsString(...)
+    */ 
+  def borrowExplicit[R,A]( resource : =>R )( destroy : R => Any )( op : R => A ) : A = borrow[R,A]( resource )( destroy )( op )
 }
 

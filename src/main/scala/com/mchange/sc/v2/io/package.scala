@@ -1,6 +1,6 @@
 package com.mchange.sc.v2;
 
-import lang.borrow
+import lang.{borrow, borrowExplicit} // borrowExplicit is a workaround for when Scala upgrades cause the normal borrow to become misinterpreted
 
 import scala.io.{Codec,Source}
 
@@ -16,7 +16,7 @@ package object io {
 
   implicit class RichFile( val file : File ) extends AnyVal {
     def contentsAsString( bufferSize : Int, codec : Codec ) : String = {
-      borrow( Source.fromFile( file, bufferSize )( codec ) )( _.close )( _.mkString )
+      borrowExplicit( Source.fromFile( file, bufferSize )( codec ) )( _.close )( _.mkString )
     }
     def contentsAsString( codec : Codec ) : String = this.contentsAsString( K128, codec )
 

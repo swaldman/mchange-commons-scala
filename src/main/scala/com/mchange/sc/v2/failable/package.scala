@@ -35,7 +35,7 @@
 
 package com.mchange.sc.v2;
 
-import com.mchange.leftright.BiasedEither;
+import com.mchange.sc.v2.yinyang._
 
 import com.mchange.sc.v1.log.{MLogger,MLevel};
 import com.mchange.sc.v1.log.MLevel._;
@@ -93,41 +93,41 @@ package object failable {
     }
     def apply[T]( block : =>T ) = Try( block ).toFailable
   }
-  type Failable[+T] = Either[Fail,T];
+  type Failable[+T] = YinYang[Fail,T];
 
-  val  Succeeded     = Right;
-  type Succeeded[+T] = Right[Fail,T];
+  val  Succeeded     = Yang;
+  type Succeeded[+T] = Yang[Fail,T];
 
-  val  Failed     = Left;
-  type Failed[+T] = Left[Fail,T];
+  val  Failed     = Yin;
+  type Failed[+T] = Yin[Fail,T];
 
   // right-bias Failable[T], for convenience and to render its API more analogous to Option[T]
-  private val FailableAsMonad = BiasedEither.RightBias.withEmptyToken[Fail]( Fail.EmptyFailable );
+  private val FailableAsMonad = YinYang.YangBias.withEmptyToken[Fail]( Fail.EmptyFailable );
 
-  implicit final class FailableOps[T]( failable : Failable[T] ) extends BiasedEither.RightBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
+  implicit final class FailableOps[T]( failable : Failable[T] ) extends YinYang.YangBias.withEmptyToken.AbstractOps( failable )( FailableAsMonad ) {
     override def get : T = failable match {
-      case Left( fail )   => fail.vomit;
-      case Right( value ) => value;
+      case Yin( fail )   => fail.vomit;
+      case Yang( value ) => value;
     }
-    def fail : Fail = failable.left.get;
+    def fail : Fail = failable.xget;
     //other methods
     def flatten[U](implicit evidence : T <:< Failable[U]) : Failable[U] = {
       failable match {
-        case oops @ Left( _ )  => refail( oops );
-        case        Right( t ) => evidence( t );
+        case oops @ Yin( _ )  => refail( oops );
+        case        Yang( t ) => evidence( t );
       }
     }
     def recover[TT >: T]( f : Fail => TT ) : Failable[TT] = {
       failable match {
-        case      Left( fail ) => succeed( f( fail ) )
-        case ok @ Right( _ )   => ok;
+        case      Yin( fail ) => succeed( f( fail ) )
+        case ok @ Yang( _ )   => ok;
       }
     }
     def recover[TT >: T]( recoveryValue : TT ) : Failable[TT] = recover( _ => recoveryValue )
 
     def orElse[TT >: T]( other : =>Failable[TT] ) : Failable[TT] = if ( failable.isSucceeded ) failable else other
 
-    def isSucceeded : Boolean = failable.isRight;
+    def isSucceeded : Boolean = failable.isYang;
     def isFailed    : Boolean = !isSucceeded;
 
     def asSucceeded[TT >: T] : Succeeded[TT] = failable.asInstanceOf[Succeeded[TT]]
@@ -149,7 +149,7 @@ package object failable {
   def fail[S : FailSource]( source : S, includeStackTrace : Boolean = true ) : Failable[Nothing] = {
     val ms = implicitly[FailSource[S]];
     val failure = ms.getFail( source, includeStackTrace );
-    Left( failure ) : Failable[Nothing];
+    Yin( failure ) : Failable[Nothing];
   }
 
   /**
@@ -157,7 +157,7 @@ package object failable {
    */  
   def refail( prefail : Failed[Any] ) : Failable[Nothing] = prefail.asInstanceOf[Failable[Nothing]]
 
-  def succeed[T]( value : T ) : Failable[T] = Right( value );
+  def succeed[T]( value : T ) : Failable[T] = Yang( value );
 
   val Poop : PartialFunction[Throwable, Failable[Nothing]] = { case scala.util.control.NonFatal( t : Throwable ) => fail( t ) }
   val ToFailable = Poop
@@ -194,8 +194,8 @@ package object failable {
         level.log( prefix + oops )( logger )
       }
       failable match {
-        case Left( oops ) => doLog( oops );
-        case Right( _ )   => /* ignore */;
+        case Yin( oops ) => doLog( oops );
+        case Yang( _ )   => /* ignore */;
       }
       failable
     }

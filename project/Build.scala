@@ -10,7 +10,7 @@ object MchangeCommonsScalaBuild extends Build {
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
     Keys.version := "0.4.3-SNAPSHOT", 
-    Keys.crossScalaVersions := Seq("2.10.4", "2.11.6"),
+    Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.2"),
     Keys.scalaVersion := "2.11.6",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
@@ -37,15 +37,17 @@ object MchangeCommonsScalaBuild extends Build {
           Keys.libraryDependencies.value ++ Seq(
             //"org.scala-lang.modules" %% "scala-xml" % "1.0.1",
             //"org.scala-lang.modules" %% "scala-swing" % "1.0.1",
-            "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2",
-            "org.scala-lang" % "scala-reflect" % Keys.scalaVersion.value
+            "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6",
+            "org.scala-lang" % "scala-reflect" % Keys.scalaVersion.value,
+            "com.typesafe.akka" %% "akka-actor" % "2.4.18"
           )
         }
         case _ => {
           // or just libraryDependencies.value if you don't depend on scala-swing
           //libraryDependencies.value :+ "org.scala-lang" % "scala-swing" % scalaVersion.value
           Keys.libraryDependencies.value ++ Seq(
-            "org.scala-lang" % "scala-reflect" % "2.10.4"
+            "org.scala-lang" % "scala-reflect" % "2.10.4",
+            "com.typesafe.akka" %% "akka-actor" % "2.3.15"
           )
         }
       }
@@ -53,11 +55,10 @@ object MchangeCommonsScalaBuild extends Build {
   );
 
   val dependencies = Seq(
-    "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "com.typesafe" % "config" % "1.2.1" % "compile,optional",
-    "org.specs2"  %% "specs2" % "2.4.6" % "test",
-    "com.mchange" %% "mlog-scala" % "0.3.9",
-    "com.mchange" %% "leftright" % "0.0.1",
+    "org.specs2"  %% "specs2-core" % "2.4.17" % "test",
+    "com.mchange" %% "mlog-scala" % "0.3.10-SNAPSHOT",
+    "com.mchange" %% "yinyang" % "0.0.2-SNAPSHOT",
     "com.mchange" % "mchange-commons-java" % "0.2.13-SNAPSHOT"
   );
 
@@ -66,7 +67,7 @@ object MchangeCommonsScalaBuild extends Build {
   lazy val mainProject = Project(
     id = "mchange-commons-scala",
     base = file("."),
-    settings = Project.defaultSettings ++ (Keys.libraryDependencies ++= dependencies)
+    settings = Defaults.coreDefaultSettings ++ (Keys.libraryDependencies ++= dependencies)
   ); 
 
   val pomExtraXml = (
