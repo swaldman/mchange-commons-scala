@@ -34,10 +34,9 @@ object ScheduledExecutorServicePoller {
           def run() : Unit = {
             try {
               if ( ! twd.timedOut ) {
-                if ( task.pollFor() ) {
-                  promise.complete( Try( task.onSuccess() ) )
-                } else {
-                  Abstract.this.scheduleTask( twd, promise )
+                task.pollFor() match {
+                  case Some( value ) => promise.success( value )
+                  case None          => Abstract.this.scheduleTask( twd, promise )
                 }
               } else {
                 promise.failure( new Poller.TimeoutException( task.label, deadline ) )
@@ -47,7 +46,6 @@ object ScheduledExecutorServicePoller {
               case NonFatal( unexpected ) => promise.failure( unexpected )
             }
           }
-
         }
 
         val millis = task.period.toMillis

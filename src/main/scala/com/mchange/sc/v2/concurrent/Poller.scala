@@ -36,7 +36,7 @@ object Poller {
     }
   }
 
-  class Task[T]( val label : String, val period : Duration, val pollFor : () => Boolean, val onSuccess : () => T, val timeout : Duration = Duration.Inf )
+  class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf )
 }
 trait Poller extends AutoCloseable {
   def addTask[T]( task : Poller.Task[T] ) : Future[T]
