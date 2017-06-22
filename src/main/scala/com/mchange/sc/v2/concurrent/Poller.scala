@@ -10,6 +10,8 @@ object Poller {
   final class TimeoutException( label : String, deadline : Long ) extends Exception( s"Poller.Task '${label}' expired at ${new java.util.Date(deadline)}" )
   final class ClosedException( instance : Poller ) extends Exception( s"Poller '${instance}' has been closed." )
 
+  implicit lazy val Default = withInternalExecutor( corePoolSize = 3 )
+
   def withExternalExecutor( ses : ScheduledExecutorService ) : Poller = new ScheduledExecutorServicePoller.withExternalExecutor( ses )
 
   def withInternalExecutor( corePoolSize : Int = 3 ) : Poller = new ScheduledExecutorServicePoller.withInternalExecutor( corePoolSize )
