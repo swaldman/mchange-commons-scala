@@ -1,16 +1,40 @@
 package com.mchange.sc.v2.concurrent
 
-import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.{ScheduledExecutorService, ScheduledThreadPoolExecutor, ThreadFactory}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object Poller {
-  class PollerException( message : String, cause : Throwable ) extends Exception( message, cause )
-  final class TimeoutException( label : String, deadline : Long ) extends Exception( s"Poller.Task '${label}' expired at ${new java.util.Date(deadline)}" )
-  final class ClosedException( instance : Poller ) extends Exception( s"Poller '${instance}' has been closed." )
+  class PollerException( message : String, cause : Throwable = null ) extends Exception( message, cause )
+  final class TimeoutException( label : String, deadline : Long ) extends PollerException( s"Poller.Task '${label}' expired at ${new java.util.Date(deadline)}" )
+  final class ClosedException( instance : Poller ) extends PollerException( s"Poller '${instance}' has been closed." )
 
-  implicit lazy val Default = withInternalExecutor( corePoolSize = 3 )
+  implicit lazy val Default = {
+    val CorePoolSize = 3
+
+    val threadFactory = new ThreadFactory {
+      override def newThread( r : Runnable ) : Thread = {
+        val out = new Thread(r)
+        out.setDaemon( true )
+        out.setName("Poller.Default")
+        out
+      }
+    }
+
+    val ses = new ScheduledThreadPoolExecutor( CorePoolSize )
+    ses.setThreadFactory( threadFactory )
+
+    new Poller {
+      val inner = new ScheduledExecutorServicePoller.withExternalExecutor( ses )
+
+      override def addTask[T]( task : Poller.Task[T] ) : Future[T] = inner.addTask( task )
+
+      override def close() : Unit = {
+        throw new PollerException( "Poller.Default cannot be close()ed. Define your own Poller instance if you wish to manage its lifecycle." )
+      }
+    }
+  }
 
   def withExternalExecutor( ses : ScheduledExecutorService ) : Poller = new ScheduledExecutorServicePoller.withExternalExecutor( ses )
 
@@ -34,8 +58,11 @@ object Poller {
     final case class withDeadline[T] ( task : Task[T], deadline : Long ) {
       def timedOut = deadline >= 0 && System.currentTimeMillis > deadline
     }
+
+    def apply[T]( label : String, period : Duration, pollFor : () => Option[T], timeout : Duration = Duration.Inf ) = new Task( label, period, pollFor, timeout )
   }
 
+  // we DON'T make Task final or a case class so that subclasses and objects with values filled in can be defined
   class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf )
 }
 trait Poller extends AutoCloseable {
