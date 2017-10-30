@@ -8,6 +8,8 @@ package object json {
   case class Segregated( clean : String, controlCharacters : String ) {
     def escapedControlCharacterList : List[String] = controlCharacters.map( c => f"\\u${c}%04x" ).toList
     def escapedControlCharacters    : String       = escapedControlCharacterList.foldLeft("")(_ + _)
+
+    def cleanBytes( codec : Codec = Codec.UTF8 ) : Array[Byte] = clean.getBytes( codec.charSet )
   }
 
   def segregateControlCharacters( input : String ) : Segregated = {
