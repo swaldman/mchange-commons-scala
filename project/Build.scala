@@ -10,7 +10,7 @@ object MchangeCommonsScalaBuild extends Build {
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
     Keys.version := "0.4.3-SNAPSHOT", 
-    Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.2"),
+    Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.4"),
     Keys.scalaVersion := "2.11.6",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
