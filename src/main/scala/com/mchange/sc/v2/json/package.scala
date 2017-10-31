@@ -34,5 +34,38 @@ package object json {
     segregateControlCharacters( input, Codec.UTF8 )
   }
 
+  def removeNulTermination( input : String ) : String = {
+    if ( notNulTerminated( input ) ) {
+      input
+    } else {
+      input.substring( 0, input.length - 1 )
+    }
+  }
+
+  def removeNulTermination( input : Array[Byte], codec : Codec = Codec.UTF8 ) : Array[Byte] = {
+    codec match {
+      case Codec.UTF8 | Codec.ISO8859 => {
+        val len = input.length
+        if ( len == 0 || input(len-1) != 0 ) {
+          input
+        }
+        else {
+          val out = Array.ofDim[Byte]( len - 1 )
+          Array.copy( input, 0, out, 0, len - 1 )
+          out
+        }
+      }
+      case _ => {
+        val cs = codec.charSet
+        removeNulTermination( new String( input, 0, input.length, cs ) ).getBytes( cs )
+      }
+    }
+  }
+
+  private def notNulTerminated( input : String ) : Boolean = {
+    val len = input.length
+    len == 0 || input(len - 1) != 0 // || ( len > 1 && Character.isSurrogatePair( input(len-2), input(len-1) ) ) XXX Not necessary, NUL cannot be a low surrogate!
+  }
+
   private def stringFromCodePoints( cps : Array[Int] ) = new String( cps, 0, cps.length )
 }
