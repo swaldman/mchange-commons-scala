@@ -9,7 +9,7 @@ object MchangeCommonsScalaBuild extends Build {
   val mySettings = Seq( 
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
-    Keys.version := "0.4.3-SNAPSHOT", 
+    Keys.version := "0.4.3", 
     Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.4"),
     Keys.scalaVersion := "2.11.6",
     Keys.publishTo <<= Keys.version { 
@@ -57,9 +57,9 @@ object MchangeCommonsScalaBuild extends Build {
   val dependencies = Seq(
     "com.typesafe" % "config" % "1.2.1" % "compile,optional",
     "org.specs2"  %% "specs2-core" % "2.4.17" % "test",
-    "com.mchange" %% "mlog-scala" % "0.3.10-SNAPSHOT",
-    "com.mchange" %% "yinyang" % "0.0.2-SNAPSHOT",
-    "com.mchange" % "mchange-commons-java" % "0.2.13-SNAPSHOT"
+    "com.mchange" %% "mlog-scala" % "0.3.10",
+    "com.mchange" %% "yinyang" % "0.0.2",
+    "com.mchange" % "mchange-commons-java" % "0.2.14"
   );
 
   override lazy val settings = super.settings ++ mySettings;
