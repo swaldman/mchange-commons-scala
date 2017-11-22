@@ -149,7 +149,7 @@ object Scheduler {
       val future          : Future[T] = promise.future.flatMap( identity )( executionContext ) // promise.future.flatten -- unfortunately, no flatten method pre-2.12
       def delayUntilNext  : Duration  = Duration( sf.getDelay(DefaultTimeUnit), DefaultTimeUnit )
     }
-    abstract class Abstract[T]( protected val ses : ScheduledExecutorService ) extends Scheduler[T] {
+    abstract class Abstract( protected val ses : ScheduledExecutorService ) extends Scheduler {
       private def reportError( t : Throwable ) : Unit = WARNING.log( s"An error occurred within ExecutionContext ${executionContext}", t )
 
       private val executionContext = ExecutionContext.fromExecutorService( ses, reportError _ )
@@ -158,12 +158,12 @@ object Scheduler {
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.schedule( runnable, delay.length, delay.unit )
         new OneTimeScheduled[T]( doSchedule, task, executionContext )
       }
-      def scheduleAtFixedRate( task : Scheduler.Task[T], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit] = {
+      def scheduleAtFixedRate( task : Scheduler.Task[Any], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit] = {
         val ctu = ConsistentTimeUnits( initialDelay, period )
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.scheduleAtFixedRate( runnable, ctu.initialDelay, ctu.period, ctu.unit )
         new RepeatingScheduled( doSchedule, task )
       }
-      def scheduleWithFixedDelay( task : Scheduler.Task[T], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit] = {
+      def scheduleWithFixedDelay( task : Scheduler.Task[Any], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit] = {
         val ctu = ConsistentTimeUnits( initialDelay, delay )
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.scheduleWithFixedDelay( runnable, ctu.initialDelay, ctu.period, ctu.unit )
         new RepeatingScheduled( doSchedule, task )
@@ -183,9 +183,9 @@ object Scheduler {
     }
   }
 }
-trait Scheduler[T] extends AutoCloseable {
+trait Scheduler extends AutoCloseable {
   def schedule[T]( task : Scheduler.Task[T], delay : Duration )                                     : Scheduler.Scheduled[T]   
-  def scheduleAtFixedRate( task : Scheduler.Task[T], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit]
-  def scheduleWithFixedDelay( task : Scheduler.Task[T], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit]
+  def scheduleAtFixedRate( task : Scheduler.Task[Any], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit]
+  def scheduleWithFixedDelay( task : Scheduler.Task[Any], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit]
   def close() : Unit
 }
