@@ -14,7 +14,11 @@ object Scheduler {
   private implicit lazy val logger = mlogger( this )
 
   type Task[T] = () => T
-  final class CancelledException extends Exception
+
+  class SchedulerException( message : String, cause : Throwable = null ) extends Exception( message, cause )
+  final class CancelledException extends SchedulerException(null, null)
+  final class ClosedException( instance : Scheduler ) extends SchedulerException( s"Secheduler '${instance}' has been closed." )
+
   trait Scheduled[T] {
     def delayUntilNext  : Duration
     def future          : Future[T]
@@ -150,38 +154,63 @@ object Scheduler {
       def delayUntilNext  : Duration  = Duration( sf.getDelay(DefaultTimeUnit), DefaultTimeUnit )
     }
     abstract class Abstract( protected val ses : ScheduledExecutorService ) extends Scheduler {
+      // MT: Protected by this' lock
+      var closed = false
+
+      def isClosed = this.synchronized { closed }
+
+      def assertNotClosed() : Unit = this.synchronized {
+        if ( closed ) throw new ClosedException( this )
+      }
+
+      def close() : Unit = this.synchronized {
+        closed = true
+      }
+
       private def reportError( t : Throwable ) : Unit = WARNING.log( s"An error occurred within ExecutionContext ${executionContext}", t )
 
       private val executionContext = ExecutionContext.fromExecutorService( ses, reportError _ )
 
-      def schedule[T]( task : Scheduler.Task[T], delay : Duration )                                     : Scheduler.Scheduled[T] = {
+      def schedule[T]( task : Scheduler.Task[T], delay : Duration ) : Scheduler.Scheduled[T] = {
+        assertNotClosed()
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.schedule( runnable, delay.length, delay.unit )
         new OneTimeScheduled[T]( doSchedule, task, executionContext )
       }
-      def scheduleAtFixedRate( task : Scheduler.Task[Any], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit] = {
+      def scheduleAtFixedRate( task : Scheduler.Task[Any], initialDelay : Duration, period : Duration ) : Scheduler.Scheduled[Unit] = {
+        assertNotClosed()
         val ctu = ConsistentTimeUnits( initialDelay, period )
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.scheduleAtFixedRate( runnable, ctu.initialDelay, ctu.period, ctu.unit )
         new RepeatingScheduled( doSchedule, task )
       }
       def scheduleWithFixedDelay( task : Scheduler.Task[Any], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit] = {
+        assertNotClosed()
         val ctu = ConsistentTimeUnits( initialDelay, delay )
         val doSchedule : Runnable => ScheduledFuture[_] = runnable => ses.scheduleWithFixedDelay( runnable, ctu.initialDelay, ctu.period, ctu.unit )
         new RepeatingScheduled( doSchedule, task )
       }
     }
   }
-  final class withExternalExecutor( ses : ScheduledExecutorService ) extends Scheduler.ScheduledExecutorService.Abstract( ses ) {
-    def close() : Unit = () // do nothing, since the destroyable resource is external, is someone else's responsibility
-  }
+  final class withExternalExecutor( ses : ScheduledExecutorService ) extends Scheduler.ScheduledExecutorService.Abstract( ses )
 
   final class withInternalExecutor( corePoolSize : Int = 3 ) extends Scheduler.ScheduledExecutorService.Abstract( new ScheduledThreadPoolExecutor( corePoolSize ) ) {
     /**
       * Here we construct and cleanup our own ScheduledThreadPoolExecutor
       */ 
     override def close() : Unit = {
+      super.close()
       ses.shutdown() // gracefully shutdown the threadpool after existing tasks have executed
     }
   }
+
+  implicit lazy val Default : Scheduler = {
+    class DefaultScheduler extends Scheduler.ScheduledExecutorService.Abstract( DefaultScheduledThreadPoolExecutor ) {
+      override def close() : Unit = {
+        throw new SchedulerException( "Scheduler.Default cannot be close()ed. Define your own Scheduler instance if you wish to manage its lifecycle." )
+      }
+    }
+    new DefaultScheduler
+  }
+
 }
 trait Scheduler extends AutoCloseable {
   def schedule[T]( task : Scheduler.Task[T], delay : Duration )                                     : Scheduler.Scheduled[T]   

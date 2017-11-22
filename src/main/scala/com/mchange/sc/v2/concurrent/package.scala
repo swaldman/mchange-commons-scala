@@ -8,6 +8,8 @@ import scala.concurrent.duration.Duration
 import scala.collection.Iterable
 import scala.collection.generic.CanBuildFrom
 
+import java.util.concurrent.{ScheduledExecutorService, ScheduledThreadPoolExecutor, ThreadFactory}
+
 package object concurrent {
 
   type CBF[T] = CanBuildFrom[Seq[Future[Try[T]]], Try[T], Seq[Try[T]]]
@@ -42,5 +44,19 @@ package object concurrent {
 
   def awaitAndGatherIndexedFailures[L,T]( seq : Seq[Future[T]], timeout : Duration = Duration.Inf )( implicit cbf : CBF[T], ec : ExecutionContext ) : Seq[(Int,Throwable)] = {
     awaitAndGatherLabeledFailures( (0 until seq.length).zip(seq) )( cbf, ec )
+  }
+
+  private [concurrent] lazy val DefaultScheduledThreadPoolExecutor : ScheduledThreadPoolExecutor = {
+    val threadFactory = new ThreadFactory {
+      override def newThread( r : Runnable ) : Thread = {
+        val out = new Thread(r)
+        out.setDaemon( true )
+        out.setName("com.mchange.sc.v2.concurrent.{Poller,Scheduler}-default")
+        out
+      }
+    }
+    val ses = new ScheduledThreadPoolExecutor( Runtime.getRuntime().availableProcessors() )
+    ses.setThreadFactory( threadFactory )
+    ses
   }
 }

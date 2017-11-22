@@ -1,38 +1,23 @@
 package com.mchange.sc.v2.concurrent
 
-import java.util.concurrent.{ScheduledExecutorService, ScheduledThreadPoolExecutor, ThreadFactory}
-
 import scala.concurrent.Future
 import scala.concurrent.duration._
+
+import java.util.concurrent.ScheduledExecutorService
+
 
 object Poller {
   class PollerException( message : String, cause : Throwable = null ) extends Exception( message, cause )
   final class TimeoutException( label : String, deadline : Long ) extends PollerException( s"Poller.Task '${label}' expired at ${new java.util.Date(deadline)}" )
   final class ClosedException( instance : Poller ) extends PollerException( s"Poller '${instance}' has been closed." )
 
-  implicit lazy val Default = {
-    val CorePoolSize = 3
+  implicit lazy val Default = new Poller {
+    val inner = new ScheduledExecutorServicePoller.withExternalExecutor( DefaultScheduledThreadPoolExecutor )
 
-    val threadFactory = new ThreadFactory {
-      override def newThread( r : Runnable ) : Thread = {
-        val out = new Thread(r)
-        out.setDaemon( true )
-        out.setName("Poller.Default")
-        out
-      }
-    }
+    override def addTask[T]( task : Poller.Task[T] ) : Future[T] = inner.addTask( task )
 
-    val ses = new ScheduledThreadPoolExecutor( CorePoolSize )
-    ses.setThreadFactory( threadFactory )
-
-    new Poller {
-      val inner = new ScheduledExecutorServicePoller.withExternalExecutor( ses )
-
-      override def addTask[T]( task : Poller.Task[T] ) : Future[T] = inner.addTask( task )
-
-      override def close() : Unit = {
-        throw new PollerException( "Poller.Default cannot be close()ed. Define your own Poller instance if you wish to manage its lifecycle." )
-      }
+    override def close() : Unit = {
+      throw new PollerException( "Poller.Default cannot be close()ed. Define your own Poller instance if you wish to manage its lifecycle." )
     }
   }
 
