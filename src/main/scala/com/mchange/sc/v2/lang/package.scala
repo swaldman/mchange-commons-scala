@@ -42,7 +42,7 @@ package object lang {
 
   implicit lazy val logger = MLogger( "com.mchange.sc.v2.lang" );
 
-  def attemptClose( resource : AutoCloseable, t : Throwable ) = {
+  def attemptClose( resource : AutoCloseable, t : Throwable = null ) = {
     try { if (resource != null) resource.close(); }
     catch {
       case e : Exception => {
@@ -53,7 +53,7 @@ package object lang {
     }
   }
 
-  def attemptDestroy[R]( resource : R, destroy : R => Any, t : Throwable ) = {
+  def attemptDestroy[R]( resource : R, destroy : R => Any, t : Throwable = null ) = {
     try { if (resource != null) destroy( resource ); }
     catch {
       case e : Exception => {
