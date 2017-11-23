@@ -20,7 +20,7 @@ object Scheduler {
   final class ClosedException( instance : Scheduler ) extends SchedulerException( s"Secheduler '${instance}' has been closed." )
 
   trait Scheduled[T] {
-    def delayUntilNext  : Duration
+    def delayUntilNext  : Option[Duration]
     def future          : Future[T]
     def attemptCancel() : Unit
 
@@ -104,7 +104,15 @@ object Scheduler {
 
       val sf : ScheduledFuture[_] = doSchedule( runnable )
 
-      def delayUntilNext : Duration = Duration( sf.getDelay(DefaultTimeUnit), DefaultTimeUnit )
+      def delayUntilNext : Option[Duration] = {
+        val rawDelay = sf.getDelay(DefaultTimeUnit)
+        if ( rawDelay < 0 ) {
+          None
+        }
+        else {
+          Some( Duration( rawDelay, DefaultTimeUnit ) )
+        }
+      }
       val future : Future[Unit] = promise.future
       def attemptCancel() : Unit = bestAttemptFailCancel( promise, new CancelledException, sf )
     }
@@ -151,7 +159,15 @@ object Scheduler {
 
       def attemptCancel() : Unit      = pc.attemptCancel
       val future          : Future[T] = promise.future.flatMap( identity )( executionContext ) // promise.future.flatten -- unfortunately, no flatten method pre-2.12
-      def delayUntilNext  : Duration  = Duration( sf.getDelay(DefaultTimeUnit), DefaultTimeUnit )
+      def delayUntilNext  : Option[Duration] = {
+        val rawDelay = sf.getDelay(DefaultTimeUnit)
+        if ( rawDelay < 0 ) {
+          None
+        }
+        else {
+          Some( Duration( rawDelay, DefaultTimeUnit ) )
+        }
+      }
     }
     abstract class Abstract( protected val ses : ScheduledExecutorService ) extends Scheduler {
       // MT: Protected by this' lock
