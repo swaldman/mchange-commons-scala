@@ -55,7 +55,7 @@ package object concurrent {
         out
       }
     }
-    val ses = new ScheduledThreadPoolExecutor( Runtime.getRuntime().availableProcessors() )
+    val ses = new ScheduledThreadPoolExecutor( scala.math.round( 1.5f * Runtime.getRuntime().availableProcessors() ) )
     ses.setThreadFactory( threadFactory )
     ses
   }
