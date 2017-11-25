@@ -50,6 +50,7 @@ object Scheduler {
     }
     private final case class ConsistentTimeUnits( initialDelay : Long, period : Long, unit : TimeUnit )
 
+    // we only return (to be thrown) fatal Throwables. otherwise null.
     private def bestAttemptCancel( sf : ScheduledFuture[_] ) : Throwable = { // null unless the Exception is fatal
       try {
         sf.cancel( false )
@@ -66,6 +67,8 @@ object Scheduler {
         }
       }
     }
+
+    // we only return (to be thrown) fatal Throwables. otherwise null.
     private def bestAttemptFail( promise : Promise[_], t : Throwable ) : Throwable = { // null unless the Exception is fatal
       try {
         promise.failure( t )
@@ -82,6 +85,8 @@ object Scheduler {
         }
       }
     }
+
+    // we only return (to be thrown) fatal Throwables. otherwise null.
     private def bestAttemptFailCancel( promise : Promise[_], t : Throwable, sf : ScheduledFuture[_] ) : Unit = {
       val fail = bestAttemptFail( promise, t )
       val cancel = bestAttemptCancel( sf )
