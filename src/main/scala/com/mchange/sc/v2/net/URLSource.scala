@@ -7,10 +7,10 @@ import java.util.concurrent.ThreadLocalRandom
 import java.net.{URL => JURL}
 
 object URLSource {
-  object URL extends URLSource[JURL] {
+  implicit object URL extends URLSource[JURL] {
     def toURL( url : JURL ) : JURL = url
   }
-  object String extends URLSource[String] {
+  implicit object String extends URLSource[String] {
     def toURL( urlStr : String ) : JURL = new JURL(urlStr)
   }
   class Seq[T : URLSource] extends URLSource[immutable.Seq[T]] {
