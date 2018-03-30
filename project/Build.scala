@@ -9,7 +9,7 @@ object MchangeCommonsScalaBuild extends Build {
   val mySettings = Seq( 
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
-    Keys.version := "0.4.5-SNAPSHOT", 
+    Keys.version := "0.4.5", 
     Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.4"),
     Keys.scalaVersion := "2.11.6",
     Keys.publishTo <<= Keys.version { 
