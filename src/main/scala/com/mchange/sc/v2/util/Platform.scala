@@ -2,7 +2,7 @@ package com.mchange.sc.v2.util
 
 import java.io.File
 
-import com.mchange.sc.v2.failable._
+import com.mchange.sc.v3.failable._
 
 import com.mchange.sc.v1.log.MLevel._
 

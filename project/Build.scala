@@ -10,8 +10,8 @@ object MchangeCommonsScalaBuild extends Build {
     Keys.organization := "com.mchange",
     Keys.name := "mchange-commons-scala", 
     Keys.version := "0.4.6-SNAPSHOT", 
-    Keys.crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.4"),
-    Keys.scalaVersion := "2.11.6",
+    Keys.crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6"),
+    Keys.scalaVersion := "2.12.6",
     Keys.publishTo <<= Keys.version { 
       (v: String) => {
 	if (v.trim.endsWith("SNAPSHOT"))
@@ -46,7 +46,7 @@ object MchangeCommonsScalaBuild extends Build {
           // or just libraryDependencies.value if you don't depend on scala-swing
           //libraryDependencies.value :+ "org.scala-lang" % "scala-swing" % scalaVersion.value
           Keys.libraryDependencies.value ++ Seq(
-            "org.scala-lang" % "scala-reflect" % "2.10.4",
+            "org.scala-lang" % "scala-reflect" % Keys.scalaVersion.value,
             "com.typesafe.akka" %% "akka-actor" % "2.3.15"
           )
         }
@@ -57,6 +57,7 @@ object MchangeCommonsScalaBuild extends Build {
   val dependencies = Seq(
     "com.mchange"  %  "mchange-commons-java" % "0.2.15",
     "com.mchange"  %% "mlog-scala"           % "0.3.10",
+    "com.mchange"  %% "failable"             % "0.0.1-SNAPSHOT" changing(),
     "com.mchange"  %% "yinyang"              % "0.0.2",
     "com.typesafe" %  "config"               % "1.2.1"  % "compile,optional",
     "org.specs2"   %% "specs2-core"          % "2.4.17" % "test"
