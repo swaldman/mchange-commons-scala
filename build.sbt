@@ -3,7 +3,7 @@ val mainProjectName = "mchange-commons-scala"
 val dependencies = Seq(
   "com.mchange"  %  "mchange-commons-java" % "0.2.15",
   "com.mchange"  %% "mlog-scala"           % "0.3.10",
-  "com.mchange"  %% "failable"             % "0.0.1-SNAPSHOT" changing(),
+  "com.mchange"  %% "failable"             % "0.0.1",
   "com.mchange"  %% "yinyang"              % "0.0.2",
   "com.typesafe" %  "config"               % "1.2.1"  % "compile,optional",
   "org.specs2"   %% "specs2-core"          % "2.4.17" % "test"
@@ -12,7 +12,7 @@ val dependencies = Seq(
 lazy val mainProject = (project in file(".")).settings(
   organization := "com.mchange",
   name := mainProjectName,
-  version := "0.4.6-SNAPSHOT",
+  version := "0.4.6",
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6"),
   scalacOptions ++= Seq("-deprecation", "-feature"),
