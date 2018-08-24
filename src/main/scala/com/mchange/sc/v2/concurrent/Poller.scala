@@ -48,7 +48,9 @@ object Poller {
   }
 
   // we DON'T make Task final or a case class so that subclasses and objects with values filled in can be defined
-  class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf )
+  class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf ) {
+    override def toString : String = s"""Poller.Task( label="${label}", period=${period}, timeout=${timeout}"""
+  }
 }
 trait Poller extends AutoCloseable {
   def addTask[T]( task : Poller.Task[T] ) : Future[T]
