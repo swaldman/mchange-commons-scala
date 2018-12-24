@@ -4,8 +4,12 @@ import lang.{borrow, borrowExplicit} // borrowExplicit is a workaround for when 
 
 import scala.io.{Codec,Source}
 
+import scala.collection._
+
 import java.io._
 import java.nio.file.{Paths, Files, StandardOpenOption}
+
+import com.mchange.sc.v2.collection.immutable.ImmutableArraySeq
 
 package object io {
   val K128 = 128 * 1024
@@ -22,10 +26,14 @@ package object io {
 
     def contentsAsString : String = this.contentsAsString( Codec.default )
 
-    def replaceContents( string : String, codec : Codec = Codec.default ) = {
+    def contentsAsByteArray : Array[Byte] = Files.readAllBytes( file.toPath )
+
+    def contentsAsByteSeq : immutable.Seq[Byte] = ImmutableArraySeq.Byte.createNoCopy( contentsAsByteArray )
+
+    def replaceContents( string : String, codec : Codec = Codec.default ) : Unit = {
       Files.write( file.toPath, string.getBytes( codec.charSet ) )
     }
-    def appendContents( string : String, codec : Codec = Codec.default ) = {
+    def appendContents( string : String, codec : Codec = Codec.default ) : Unit = {
       Files.write( file.toPath, string.getBytes( codec.charSet ), StandardOpenOption.APPEND )
     }
   }
