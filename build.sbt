@@ -3,7 +3,7 @@ val mainProjectName = "mchange-commons-scala"
 val dependencies = Seq(
   "com.mchange"  %  "mchange-commons-java" % "0.2.15",
   "com.mchange"  %% "mlog-scala"           % "0.3.10",
-  "com.mchange"  %% "failable"             % "0.0.2-SNAPSHOT",
+  "com.mchange"  %% "failable"             % "0.0.2",
   "com.mchange"  %% "yinyang"              % "0.0.2",
   "com.typesafe" %  "config"               % "1.2.1"  % "compile,optional",
   "org.specs2"   %% "specs2-core"          % "2.4.17" % "test"
