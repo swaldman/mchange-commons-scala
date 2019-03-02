@@ -30,8 +30,20 @@ package object io {
 
     def contentsAsByteSeq : immutable.Seq[Byte] = ImmutableArraySeq.Byte.createNoCopy( contentsAsByteArray )
 
+    def replaceContents( bytes : Seq[Byte] ) : Unit = {
+      replaceContents( bytes.toArray )
+    }
+    def replaceContents( bytes : Array[Byte] ) : Unit = {
+      Files.write( file.toPath, bytes )
+    }
     def replaceContents( string : String, codec : Codec = Codec.default ) : Unit = {
       Files.write( file.toPath, string.getBytes( codec.charSet ) )
+    }
+    def appendContents( bytes : Seq[Byte] ) : Unit = {
+      appendContents( bytes.toArray )
+    }
+    def appendContents( bytes : Array[Byte] ) : Unit = {
+      Files.write( file.toPath, bytes, StandardOpenOption.APPEND )
     }
     def appendContents( string : String, codec : Codec = Codec.default ) : Unit = {
       Files.write( file.toPath, string.getBytes( codec.charSet ), StandardOpenOption.APPEND )
