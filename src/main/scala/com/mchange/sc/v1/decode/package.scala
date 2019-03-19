@@ -1,14 +1,14 @@
 /*
- * Distributed as part of mchange-commons-scala v0.4.0
+ * Distributed as part of mchange-commons-scala v0.4.9
  *
- * Copyright (C) 2015 Machinery For Change, Inc.
+ * Copyright (C) 2019 Machinery For Change, LLC
  *
  * Author: Steve Waldman <swaldman@mchange.com>
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of EITHER:
  *
- *     1) The GNU Lesser General Public License (LGPL), version 2.1, as 
+ *     1) The GNU Lesser General Public License (LGPL), version 2.1, as
  *        published by the Free Software Foundation
  *
  * OR
@@ -29,8 +29,8 @@
  * If not, the text of these licenses are currently available at
  *
  * LGPL v2.1: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- *  EPL v1.0: http://www.eclipse.org/org/documents/epl-v10.php 
- * 
+ *  EPL v1.0: http://www.eclipse.org/org/documents/epl-v10.php
+ *
  */
 
 package com.mchange.sc.v1;
