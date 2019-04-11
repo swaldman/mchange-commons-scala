@@ -75,7 +75,7 @@ object Poller {
     /**
       * @param deadline, as Long in milliseconds since UNIX epoch, negative values mean no deadline!
       */ 
-    final case class withDeadline[T] ( task : Task[T], deadline : Long ) {
+    final case class withDeadline[T] private ( task : Task[T], deadline : Long ) {
       def timedOut = deadline >= 0 && System.currentTimeMillis > deadline
     }
 
