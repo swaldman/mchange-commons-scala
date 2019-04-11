@@ -2,17 +2,17 @@ val mainProjectName = "mchange-commons-scala"
 
 val dependencies = Seq(
   "com.mchange"  %  "mchange-commons-java" % "0.2.15",
-  "com.mchange"  %% "mlog-scala"           % "0.3.10",
-  "com.mchange"  %% "failable"             % "0.0.2",
+  "com.mchange"  %% "mlog-scala"           % "0.3.11",
+  "com.mchange"  %% "failable"             % "0.0.3",
   "com.mchange"  %% "yinyang"              % "0.0.2",
-  "com.typesafe" %  "config"               % "1.2.1"  % "compile,optional",
+  "com.typesafe" %  "config"               % "1.3.0"  % "compile,optional",
   "org.specs2"   %% "specs2-core"          % "2.4.17" % "test"
 );
 
 lazy val mainProject = (project in file(".")).settings(
   organization := "com.mchange",
   name := mainProjectName,
-  version := "0.4.9",
+  version := "0.4.10-SNAPSHOT",
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8"),
   scalacOptions ++= Seq("-deprecation", "-feature"),
