@@ -35,12 +35,18 @@
 
 package com.mchange.sc.v2;
 
-import com.mchange.sc.v1.log.MLogger;
-import com.mchange.sc.v1.log.MLevel._;
+import com.mchange.sc.v1.log.MLogger
+import com.mchange.sc.v1.log.MLevel._
+
+import com.mchange.lang.ThrowableUtils
 
 package object lang {
 
-  implicit lazy val logger = MLogger( "com.mchange.sc.v2.lang" );
+  implicit lazy val logger = MLogger( "com.mchange.sc.v2.lang" )
+
+  implicit class ThrowableOps( val t : Throwable ) extends AnyVal {
+    def fullStackTrace : String = ThrowableUtils.extractStackTrace( t )
+  }
 
   def attemptClose( resource : AutoCloseable, t : Throwable = null ) = {
     try { if (resource != null) resource.close(); }
