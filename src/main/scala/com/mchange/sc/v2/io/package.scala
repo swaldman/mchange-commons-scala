@@ -53,6 +53,27 @@ package object io {
     borrow( new PrintWriter( new OutputStreamWriter( new BufferedOutputStream( new FileOutputStream( file ), bufferLen ), codec.charSet ) ) )( op )
   }
 
+  implicit class RichInputStream( val is : InputStream ) extends AnyVal {
+    def remainingToByteArray : Array[Byte] = {
+      val bis : BufferedInputStream = {
+        is match {
+          case b : BufferedInputStream => b
+          case o                       => new BufferedInputStream(o)
+        }
+      }
+      val baos = new ByteArrayOutputStream()
+      var c = bis.read()
+      while ( c >= 0 ) {
+        baos.write(c)
+        c = bis.read()
+      }
+      baos.toByteArray
+    }
+    def remainingToByteSeq : immutable.Seq[Byte] = {
+      ImmutableArraySeq.Byte.createNoCopy( remainingToByteArray )
+    }
+  }
+
   implicit class RichFile( val file : File ) extends AnyVal {
     def contentsAsString( bufferSize : Int, codec : Codec ) : String = {
       borrowExplicit( Source.fromFile( file, bufferSize )( codec ) )( _.close )( _.mkString )
