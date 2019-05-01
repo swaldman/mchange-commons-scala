@@ -61,13 +61,18 @@ package object io {
           case o                       => new BufferedInputStream(o)
         }
       }
-      val baos = new ByteArrayOutputStream()
-      var c = bis.read()
-      while ( c >= 0 ) {
-        baos.write(c)
-        c = bis.read()
+      try {
+        val baos = new ByteArrayOutputStream()
+        var c = bis.read()
+        while ( c >= 0 ) {
+          baos.write(c)
+          c = bis.read()
+        }
+        baos.toByteArray
       }
-      baos.toByteArray
+      finally {
+        bis.close()
+      }
     }
     def remainingToByteSeq : immutable.Seq[Byte] = {
       ImmutableArraySeq.Byte.createNoCopy( remainingToByteArray )
