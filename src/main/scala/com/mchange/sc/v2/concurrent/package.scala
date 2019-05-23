@@ -49,6 +49,10 @@ package object concurrent {
 
   type CBF[T] = CanBuildFrom[Seq[Future[Try[T]]], Try[T], Seq[Try[T]]]
 
+  implicit class FutureOps[T]( val inner : Future[T] ) extends AnyVal {
+    def awaitResult( duration : Duration = Duration.Inf ) : T = Await.result( inner, duration )
+  }
+
   // because the semantics of Future sequence are poorly
   // documented, and apparently (oddly to me), the Seq
   // completes on the first failure

@@ -61,6 +61,7 @@ lazy val publishResolveSettings = {
     resolvers += ("snapshots" at nexusSnapshots),
     resolvers += ("Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"),
     resolvers += ("Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"),
+
     publishTo := {
       val v = version.value
       if (v.trim.endsWith("SNAPSHOT")) {
