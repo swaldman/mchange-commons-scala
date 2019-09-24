@@ -269,7 +269,7 @@ object Scheduler {
 
 }
 trait Scheduler extends AutoCloseable {
-  def schedule[T]( task : Scheduler.Task[T], delay : Duration )                                     : Scheduler.Scheduled[T]   
+  def schedule[T]( task : Scheduler.Task[T], delay : Duration )                                       : Scheduler.Scheduled[T]   
   def scheduleAtFixedRate( task : Scheduler.Task[Any], initialDelay : Duration, period : Duration )   : Scheduler.Scheduled[Unit]
   def scheduleWithFixedDelay( task : Scheduler.Task[Any], initialDelay : Duration, delay : Duration ) : Scheduler.Scheduled[Unit]
   def close() : Unit
