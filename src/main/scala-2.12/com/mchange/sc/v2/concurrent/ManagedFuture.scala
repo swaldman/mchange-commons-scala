@@ -124,8 +124,8 @@ object ManagedFuture {
 
   class Uncertain[T] private[ManagedFuture] ( manager : ManagedFuture.Manager, body : => T )( implicit ec : ExecutionContext ) extends Base[T] {
     val inner = {
-      // we've gotto register synchronously, so that clients can guarantee
-      // regsitrations happen before manager.closeRegistration()
+      // we've gotta register synchronously, so that clients can guarantee
+      // registrations happen before manager.closeRegistration()
       manager.register() 
       try {
         Future {
