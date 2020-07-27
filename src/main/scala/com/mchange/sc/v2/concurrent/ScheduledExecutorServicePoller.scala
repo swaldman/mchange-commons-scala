@@ -53,11 +53,11 @@ object ScheduledExecutorServicePoller {
     def addTask[T]( task : Poller.Task[T] ) : Future[T] = {
 
       val promise = Promise[T]()
-      scheduleTask( Poller.Task.withDeadline( task ), promise )
+      scheduleTask( Poller.Task.withDeadline( task ), promise, true )
       promise.future
     }
 
-    private def scheduleTask[T]( twd : Poller.Task.withDeadline[T], promise : Promise[T] ) : Unit = {
+    private def scheduleTask[T]( twd : Poller.Task.withDeadline[T], promise : Promise[T], first : Boolean ) : Unit = {
       if ( isClosed ) {
         promise.failure( new Poller.ClosedException( this ) )
       } else {
@@ -71,7 +71,7 @@ object ScheduledExecutorServicePoller {
               if ( ! twd.timedOut ) {
                 task.pollFor() match {
                   case Some( value ) => promise.success( value )
-                  case None          => Abstract.this.scheduleTask( twd, promise )
+                  case None          => Abstract.this.scheduleTask( twd, promise, false )
                 }
               } else {
                 promise.failure( new Poller.TimeoutException( task.label, deadline ) )
@@ -83,8 +83,13 @@ object ScheduledExecutorServicePoller {
           }
         }
 
-        val millis = task.period.toMillis
-        ses.schedule( runnable, millis, TimeUnit.MILLISECONDS )
+        if ( first ) {
+          ses.submit( runnable ) // initial check should be immediate
+        }
+        else {
+          val millis = task.period.toMillis
+          ses.schedule( runnable, millis, TimeUnit.MILLISECONDS )
+        }
       }
     }
 
