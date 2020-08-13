@@ -83,7 +83,7 @@ object ScheduledExecutorServicePoller {
           }
         }
 
-        if ( first ) {
+        if ( first && task.pollImmediately ) {
           ses.submit( runnable ) // initial check should be immediate
         }
         else {
