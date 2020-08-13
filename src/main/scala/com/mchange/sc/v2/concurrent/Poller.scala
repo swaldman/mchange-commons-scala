@@ -79,12 +79,15 @@ object Poller {
       def timedOut = deadline >= 0 && System.currentTimeMillis > deadline
     }
 
-    def apply[T]( label : String, period : Duration, pollFor : () => Option[T], timeout : Duration = Duration.Inf ) = new Task( label, period, pollFor, timeout )
+    def apply[T]( label : String, period : Duration, pollFor : () => Option[T] )                                                = new Task( label, period, pollFor )
+    def apply[T]( label : String, period : Duration, pollFor : () => Option[T], timeout : Duration )                            = new Task( label, period, pollFor, timeout = timeout )
+    def apply[T]( label : String, period : Duration, pollFor : () => Option[T], pollImmediately : Boolean )                     = new Task( label, period, pollFor, pollImmediately = pollImmediately )
+    def apply[T]( label : String, period : Duration, pollFor : () => Option[T], timeout : Duration, pollImmediately : Boolean ) = new Task( label, period, pollFor, timeout = timeout, pollImmediately = pollImmediately )
   }
 
   // we DON'T make Task final or a case class so that subclasses and objects with values filled in can be defined
   class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf, val pollImmediately : Boolean = true ) {
-    override def toString : String = s"""Poller.Task( label="${label}", period=${period}, timeout=${timeout}"""
+    override def toString : String = s"""Poller.Task( label="${label}", period=${period}, timeout=${timeout}, pollImmediately=${pollImmediately}"""
   }
 }
 trait Poller extends AutoCloseable {
