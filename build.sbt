@@ -12,9 +12,9 @@ val dependencies = Seq(
 lazy val mainProject = (project in file(".")).settings(
   organization := "com.mchange",
   name := mainProjectName,
-  version := "0.4.13",
-  scalaVersion := "2.12.10",
-  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.10"),
+  version := "0.4.14",
+  scalaVersion := "2.12.12",
+  crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.12"),
   scalacOptions ++= Seq("-deprecation", "-feature"),
 
   // UGH!
