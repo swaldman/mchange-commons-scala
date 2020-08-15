@@ -86,8 +86,10 @@ object Poller {
   }
 
   // we DON'T make Task final or a case class so that subclasses and objects with values filled in can be defined
-  class Task[T]( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf, val pollImmediately : Boolean = true ) {
+  class Task[T] ( val label : String, val period : Duration, val pollFor : () => Option[T], val timeout : Duration = Duration.Inf, val pollImmediately : Boolean = true ) {
     override def toString : String = s"""Poller.Task( label="${label}", period=${period}, timeout=${timeout}, pollImmediately=${pollImmediately}"""
+
+    def this( label : String, period : Duration, pollFor : () => Option[T], timeout : Duration) = this( label, period, pollFor, timeout, true )
   }
 }
 trait Poller extends AutoCloseable {
